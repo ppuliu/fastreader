@@ -13,12 +13,14 @@ class JobStore:
     def _path(self, job_id: str) -> Path:
         return self.dir / f"{job_id}.json"
 
-    def create(self, *, doc_id: str, title: str) -> dict:
+    def create(self, *, doc_id: str, title: str,
+               author: str = "Unknown", kind: str = "book") -> dict:
         self.dir.mkdir(parents=True, exist_ok=True)
         job = {
             "id": uuid.uuid4().hex[:12], "doc_id": doc_id, "title": title,
+            "author": author, "kind": kind,
             "status": "queued", "detail": "queued", "error": None,
-            "created_at": time.time(),
+            "restarts": 0, "created_at": time.time(),
         }
         self._path(job["id"]).write_text(json.dumps(job))
         return job

@@ -29,13 +29,34 @@ jobs = JobStore(DATA_DIR / "jobs")
 app = FastAPI(title="FastReader")
 
 
+MAX_JOB_RESTARTS = 2
+
+
 @app.on_event("startup")
-def fail_orphaned_jobs():
-    """Jobs whose worker died with a previous container must not spin forever."""
+async def recover_orphaned_jobs():
+    """A deploy restarts the container mid-job; rerun interrupted jobs from the
+    persisted raw text instead of failing them (bounded, so nothing spins forever)."""
+    import asyncio
+
     for job in jobs.list(limit=100):
-        if job["status"] in ("queued", "processing"):
+        if job["status"] not in ("queued", "processing"):
+            continue
+        restarts = job.get("restarts", 0)
+        raw_path = DATA_DIR / "raw" / f"{job['doc_id']}.txt"
+        if restarts >= MAX_JOB_RESTARTS:
             jobs.update(job["id"], status="failed", detail="failed",
-                        error="processing was interrupted by a server restart — please upload again")
+                        error=f"interrupted by a server restart {restarts + 1} times — giving up")
+        elif not raw_path.is_file():
+            jobs.update(job["id"], status="failed", detail="failed",
+                        error="interrupted by a server restart and the source text "
+                              "is gone — please upload again")
+        else:
+            jobs.update(job["id"], status="queued", restarts=restarts + 1,
+                        detail="requeued after a server restart")
+            req_data = {"title": job["title"], "author": job.get("author", "Unknown"),
+                        "kind": job.get("kind", "book")}
+            asyncio.create_task(process_job(
+                job["id"], job["doc_id"], req_data, raw_path.read_text()))
 
 MAX_UPLOAD_CHARS = 400_000
 MIN_UPLOAD_WORDS = 120
@@ -98,7 +119,7 @@ def upload(req: UploadRequest, background: BackgroundTasks):
     raw_dir = DATA_DIR / "raw"
     raw_dir.mkdir(parents=True, exist_ok=True)
     (raw_dir / f"{doc_id}.txt").write_text(req.text)
-    job = jobs.create(doc_id=doc_id, title=req.title)
+    job = jobs.create(doc_id=doc_id, title=req.title, author=req.author, kind=req.kind)
     background.add_task(process_job, job["id"], doc_id, req.model_dump(), req.text)
     return {"job_id": job["id"], "doc_id": doc_id}
 
