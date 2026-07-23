@@ -176,7 +176,15 @@ and dismissing a failed card deletes it for good. A durable job queue can come l
    Haiku can rewrite on the fly as you zoom, preprocessing disappears entirely — and
    with it the fixed level count. Zoom becomes truly continuous: any passage, at any
    depth, generated the moment you ask for it.
-5. **Product plumbing.** User accounts and auth, PDF upload and fetch-from-URL, and a
+5. **Smarter payloads for scale.** Today the reader downloads a document's entire
+   level pyramid in one response — great for instant zoom, but it won't survive much
+   bigger documents or slow connections. A better design: fetch only the level you're
+   on plus a window around your position, prefetch the levels above and below your
+   current spot (those are the only places a zoom can land), and let a CDN cache the
+   immutable document chunks. The alignment spans already give every segment a stable
+   address, so the API can serve any slice of any level without the client losing its
+   place.
+6. **Product plumbing.** User accounts and auth, PDF upload and fetch-from-URL, and a
    chat panel for asking questions about the book you're reading.
 
 ---
