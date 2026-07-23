@@ -23,6 +23,10 @@ export async function uploadDocument(payload: UploadPayload): Promise<{ job_id: 
   return r.json();
 }
 
+export async function deleteJob(id: string): Promise<void> {
+  await fetch(`/api/jobs/${id}`, { method: 'DELETE' });
+}
+
 export async function fetchJobs(): Promise<Job[]> {
   const r = await fetch('/api/jobs');
   if (!r.ok) throw new Error(`jobs failed: ${r.status}`);

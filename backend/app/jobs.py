@@ -37,6 +37,13 @@ class JobStore:
             return None
         return json.loads(path.read_text())
 
+    def delete(self, job_id: str) -> bool:
+        path = self._path(job_id)
+        if not path.is_file():
+            return False
+        path.unlink()
+        return True
+
     def list(self, limit: int = 20) -> list[dict]:
         if not self.dir.is_dir():
             return []

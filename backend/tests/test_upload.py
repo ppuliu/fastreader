@@ -91,3 +91,26 @@ def test_orphaned_jobs_failed_on_startup(app_env):
     with TestClient(app_env.app):  # context manager triggers startup events
         pass
     assert app_env.jobs.get(job["id"])["status"] == "failed"
+
+
+def test_dismiss_deletes_failed_job(app_env, monkeypatch):
+    import scripts.pipeline as pipeline_mod
+
+    async def boom(*a, **kw):
+        raise RuntimeError("nope")
+
+    monkeypatch.setattr(pipeline_mod, "run_pipeline", boom)
+    client = TestClient(app_env.app)
+    r = client.post("/api/upload", json={"title": "Bad", "text": LONG_TEXT})
+    job_id = r.json()["job_id"]
+    assert client.delete(f"/api/jobs/{job_id}").status_code == 200
+    assert client.get(f"/api/jobs/{job_id}").status_code == 404
+    assert client.delete(f"/api/jobs/{job_id}").status_code == 404
+
+
+def test_cannot_delete_running_job(app_env):
+    job = app_env.jobs.create(doc_id="x", title="X")
+    app_env.jobs.update(job["id"], status="processing")
+    # plain TestClient (no context manager) so startup cleanup doesn't fail the job first
+    client = TestClient(app_env.app)
+    assert client.delete(f"/api/jobs/{job['id']}").status_code == 409

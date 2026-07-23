@@ -116,5 +116,16 @@ def get_job(job_id: str):
     return job
 
 
+@app.delete("/api/jobs/{job_id}")
+def delete_job(job_id: str):
+    job = jobs.get(job_id)
+    if job is None:
+        raise HTTPException(status_code=404, detail="job not found")
+    if job["status"] in ("queued", "processing"):
+        raise HTTPException(status_code=409, detail="job is still running")
+    jobs.delete(job_id)
+    return {"deleted": job_id}
+
+
 if Path(STATIC_DIR).is_dir():
     app.mount("/", StaticFiles(directory=STATIC_DIR, html=True), name="static")

@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import type { DocSummary } from '../lib/doc';
 import { readingTime } from '../lib/doc';
 import type { Job } from '../api';
-import { fetchJobs } from '../api';
+import { deleteJob, fetchJobs } from '../api';
 import { UploadModal } from './UploadModal';
 
 export function Library({ docs, onOpen, onRefresh }:
@@ -34,6 +34,17 @@ export function Library({ docs, onOpen, onRefresh }:
   }, [hasActive, poll]);
 
   const docIds = new Set(docs.map((d) => d.id));
+
+  // A done job whose document is in the library has served its purpose — reap it.
+  useEffect(() => {
+    for (const j of jobs) {
+      if (j.status === 'done' && docIds.has(j.doc_id)) {
+        deleteJob(j.id).catch(() => {});
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [jobs, docs]);
+
   const visibleJobs = jobs.filter((j) =>
     !dismissed.has(j.id) &&
     (j.status === 'queued' || j.status === 'processing' ||
@@ -80,7 +91,11 @@ export function Library({ docs, onOpen, onRefresh }:
             {j.status === 'failed' ? (
               <>
                 <div className="mt-2 text-[12px] leading-relaxed text-red-300">{j.error || 'processing failed'}</div>
-                <button onClick={() => setDismissed(new Set([...dismissed, j.id]))}
+                <button
+                  onClick={() => {
+                    setDismissed(new Set([...dismissed, j.id]));
+                    deleteJob(j.id).then(poll).catch(() => {});
+                  }}
                   className="mt-3 text-[12px] text-[#8b8f9e] hover:text-[#d7d9e0] cursor-pointer">Dismiss</button>
               </>
             ) : (
