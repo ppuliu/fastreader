@@ -6,6 +6,7 @@ plan) and `submit_rewrites` (assembles + validates; errors bounce back into the
 loop until the document is clean)."""
 import asyncio
 import json
+import os
 from pathlib import Path
 
 from claude_agent_sdk import (
@@ -133,6 +134,12 @@ async def run_pipeline(raw_text: str, *, doc_id: str, title: str, author: str,
     server = create_sdk_mcp_server(name="pipeline", version="1.0.0",
                                    tools=[get_source, submit_rewrites])
     tool_names = ["mcp__pipeline__get_source", "mcp__pipeline__submit_rewrites"]
+    stderr_tail: list[str] = []
+
+    def collect_stderr(line: str) -> None:
+        stderr_tail.append(line)
+        del stderr_tail[:-15]
+
     options = ClaudeAgentOptions(
         model=model,
         system_prompt=SYSTEM_PROMPT,
@@ -143,22 +150,34 @@ async def run_pipeline(raw_text: str, *, doc_id: str, title: str, author: str,
         permission_mode="bypassPermissions",
         setting_sources=[],
         max_turns=30,
+        # The container runs as root; Claude Code only allows bypassPermissions
+        # there when explicitly marked as a sandbox.
+        env={"IS_SANDBOX": "1"},
+        stderr=collect_stderr,
     )
 
     status("starting rewrite agent")
     result: ResultMessage | None = None
-    async for message in query(
-        prompt=f"Process the document '{title}' into {n_levels} zoom levels. "
-               f"Start by calling get_source.",
-        options=options,
-    ):
-        if isinstance(message, AssistantMessage):
-            status(f"agent is writing (attempt {state['attempts'] + 1} of the rewrite)")
-        elif isinstance(message, ResultMessage):
-            result = message
+    try:
+        async for message in query(
+            prompt=f"Process the document '{title}' into {n_levels} zoom levels. "
+                   f"Start by calling get_source.",
+            options=options,
+        ):
+            if isinstance(message, AssistantMessage):
+                status(f"agent is writing (attempt {state['attempts'] + 1} of the rewrite)")
+            elif isinstance(message, ResultMessage):
+                result = message
+    except Exception as e:
+        hint = ("" if os.environ.get("ANTHROPIC_API_KEY")
+                else " — ANTHROPIC_API_KEY is not set, which this deployment requires")
+        tail = f" | stderr: {' / '.join(stderr_tail[-3:])}" if stderr_tail else ""
+        raise RuntimeError(f"rewrite agent failed: {e}{hint}{tail}") from e
 
     if state["doc"] is None:
         detail = getattr(result, "result", None) or "agent finished without a valid submission"
+        if stderr_tail:
+            detail = f"{detail} | stderr: {' / '.join(stderr_tail[-3:])}"
         raise RuntimeError(f"pipeline failed after {state['attempts']} attempt(s): {detail}")
 
     out_path = Path(out_path)
