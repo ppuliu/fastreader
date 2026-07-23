@@ -222,3 +222,6 @@ __marimo__/
 
 # lib/ above is for Python build artifacts — keep frontend source
 !frontend/src/lib/
+
+# runtime uploads (local dev)
+data/uploads/
