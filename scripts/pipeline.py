@@ -26,8 +26,10 @@ pyramid of true rewrites, so a reader can zoom between depth levels like Google 
 zooms a map.
 
 Work strictly through your two tools:
-1. Call get_source once to read the document (numbered sections and paragraphs) and
-   the required level plan.
+1. Read the whole document with get_source (numbered sections and paragraphs, plus
+   the required level plan). Long documents come in numbered parts — call
+   get_source with part=1, then part=2, and so on until the part marked
+   [END OF DOCUMENT]. Never start writing before you have read every part.
 2. Write the rewrites and call submit_rewrites. If it returns errors, fix them and
    submit again until it succeeds.
 
@@ -57,12 +59,42 @@ Rules:
   the dial stops a reader travels ("In one breath", "The argument", "Every word").
   Never generic labels like "Level 1" or "Summary".
 
-Do not use any other tools. Do not write files. Work in this order: get_source,
-think through the structure, then submit."""
+Do not use any other tools. Do not write files. Work in this order: read every
+get_source part, think through the structure, then submit."""
 
 
 def _status_noop(detail: str) -> None:
     pass
+
+
+# One tool result must stay well under the harness's MCP output cap (~25k tokens);
+# oversized results get diverted to a file the sandboxed agent cannot read.
+PAGE_WORDS = 8_000
+
+
+def source_pages(work: dict, page_words: int = PAGE_WORDS) -> list[str]:
+    """Render the numbered sections/paragraphs as page-sized strings.
+
+    Paragraphs are never split; a section that overflows a page continues on the
+    next one with a "(cont.)" marker. Paragraph numbering is global across pages.
+    """
+    pages: list[list[str]] = [[]]
+    budget = page_words
+    p_idx = 0
+    for s_idx, sec in enumerate(work["sections"]):
+        heading = sec["title"] or "(untitled)"
+        header = f"== SECTION {s_idx}: {heading} ({len(sec['paragraphs'])} paragraphs)"
+        pages[-1].append(header)
+        for para in sec["paragraphs"]:
+            words = len(para.split())
+            if budget - words < 0 and any(l.startswith("[") for l in pages[-1]):
+                pages.append([f"== SECTION {s_idx}: {heading} (cont.)"])
+                budget = page_words
+            pages[-1].append(f"[{p_idx}] {para}")
+            budget -= words
+            p_idx += 1
+        pages[-1].append("")
+    return ["\n".join(lines) for lines in pages]
 
 
 async def run_pipeline(raw_text: str, *, doc_id: str, title: str, author: str,
@@ -79,29 +111,32 @@ async def run_pipeline(raw_text: str, *, doc_id: str, title: str, author: str,
     paragraph_total = sum(len(s["paragraphs"]) for s in work["sections"])
 
     state: dict = {"doc": None, "attempts": 0}
+    pages = source_pages(work)
 
     @tool(name="get_source",
-          description="Read the document: stats, required level plan, and every section/paragraph, numbered.",
-          input_schema={})
+          description="Read the document: stats, required level plan, and every section/paragraph, "
+                      "numbered. Large documents span multiple parts; pass `part` (1-based) and "
+                      "keep reading until the final part.",
+          input_schema={"part": int})
     async def get_source(args):
-        status("agent is reading the source")
-        lines = [
+        part = int(args.get("part") or 1)
+        if not 1 <= part <= len(pages):
+            return {"content": [{"type": "text", "text":
+                    f"ERROR: part must be between 1 and {len(pages)}."}]}
+        status(f"agent is reading the source (part {part} of {len(pages)})")
+        header = [
             f"TITLE: {title}",
             f"KIND: {kind}",
             f"TOTAL WORDS: {total_words}",
             f"PARAGRAPH TOTAL: {paragraph_total}",
             f"REQUIRED LEVELS: {n_levels} (so exactly {n_mids} mid level(s) between gist and full text)",
+            f"PART {part} OF {len(pages)}"
+            + ("" if part == len(pages) else f" — call get_source with part={part + 1} to continue"),
             "",
         ]
-        p_idx = 0
-        for s_idx, sec in enumerate(work["sections"]):
-            heading = sec["title"] or "(untitled)"
-            lines.append(f"== SECTION {s_idx}: {heading} ({len(sec['paragraphs'])} paragraphs)")
-            for para in sec["paragraphs"]:
-                lines.append(f"[{p_idx}] {para}")
-                p_idx += 1
-            lines.append("")
-        return {"content": [{"type": "text", "text": "\n".join(lines)}]}
+        footer = ("\n[END OF DOCUMENT]" if part == len(pages)
+                  else f"\n[continued in part {part + 1} of {len(pages)}]")
+        return {"content": [{"type": "text", "text": "\n".join(header) + pages[part - 1] + footer}]}
 
     @tool(name="submit_rewrites",
           description="Submit the rewrites JSON (as a string). Assembles and validates the "
@@ -149,7 +184,7 @@ async def run_pipeline(raw_text: str, *, doc_id: str, title: str, author: str,
                           "WebSearch", "WebFetch", "Task", "NotebookEdit"],
         permission_mode="bypassPermissions",
         setting_sources=[],
-        max_turns=30,
+        max_turns=30 + 2 * len(pages),
         # The container runs as root; Claude Code only allows bypassPermissions
         # there when explicitly marked as a sandbox.
         env={"IS_SANDBOX": "1"},
@@ -161,7 +196,8 @@ async def run_pipeline(raw_text: str, *, doc_id: str, title: str, author: str,
     try:
         async for message in query(
             prompt=f"Process the document '{title}' into {n_levels} zoom levels. "
-                   f"Start by calling get_source.",
+                   f"The source has {len(pages)} part(s). Start by calling get_source "
+                   f"with part=1 and read every part before writing.",
             options=options,
         ):
             if isinstance(message, AssistantMessage):
