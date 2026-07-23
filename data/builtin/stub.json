@@ -1,8 +1,0 @@
-{
-  "id": "stub", "title": "Stub Doc", "author": "Nobody", "kind": "book",
-  "levels": [{ "name": "Gist", "words": 4 }, { "name": "Full", "words": 10 }],
-  "segments": [
-    [{ "text": "a tiny stub document", "span": [0, 2] }],
-    [{ "text": "first full paragraph here" }, { "text": "second full paragraph here" }]
-  ]
-}
