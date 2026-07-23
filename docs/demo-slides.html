@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FastReader — Demo Intro Slides</title>
+
+<!-- Fonts: Archivo (display) + Nunito (body) — Swiss Modern preset -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800;900&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+
+<style>
+/* ===========================================
+   THEME — Swiss Modern
+   White / black / red. Change these variables
+   to retheme the whole deck.
+   =========================================== */
+:root {
+    --bg: #ffffff;
+    --ink: #000000;
+    --ink-soft: #333333;
+    --muted: #6a6a6a;
+    --red: #ff3300;
+    --grid-line: rgba(0, 0, 0, 0.045);
+
+    --font-display: 'Archivo', sans-serif;
+    --font-body: 'Nunito', sans-serif;
+
+    --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+    --duration-normal: 0.7s;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-body);
+}
+
+/* ===========================================
+   VIEWPORT FITTING: MANDATORY BASE STYLES
+   =========================================== */
+
+/* 1. Lock html/body to viewport */
+html, body {
+    height: 100%;
+    overflow-x: hidden;
+}
+
+html {
+    scroll-snap-type: y mandatory;
+    scroll-behavior: smooth;
+}
+
+/* 2. Each slide = exact viewport height */
+.slide {
+    width: 100vw;
+    height: 100vh;
+    height: 100dvh; /* Dynamic viewport height for mobile browsers */
+    overflow: hidden; /* CRITICAL: Prevent ANY overflow */
+    scroll-snap-align: start;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+/* 3. Content container with flex for centering */
+.slide-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    max-height: 100%;
+    overflow: hidden; /* Double-protection against overflow */
+    padding: var(--slide-padding);
+}
+
+/* 4. ALL typography uses clamp() for responsive scaling */
+:root {
+    --title-size: clamp(1.5rem, 5vw, 4rem);
+    --h2-size: clamp(1.25rem, 3.5vw, 2.5rem);
+    --h3-size: clamp(1rem, 2.5vw, 1.75rem);
+
+    --body-size: clamp(0.75rem, 1.5vw, 1.125rem);
+    --small-size: clamp(0.65rem, 1vw, 0.875rem);
+
+    --slide-padding: clamp(1rem, 4vw, 4rem);
+    --content-gap: clamp(0.5rem, 2vw, 2rem);
+    --element-gap: clamp(0.25rem, 1vw, 1rem);
+}
+
+/* 5. Cards/containers use viewport-relative max sizes */
+.card, .container, .content-box {
+    max-width: min(90vw, 1000px);
+    max-height: min(80vh, 700px);
+}
+
+/* 6. Lists auto-scale with viewport */
+.feature-list, .bullet-list {
+    gap: clamp(0.4rem, 1vh, 1rem);
+}
+
+.feature-list li, .bullet-list li {
+    font-size: var(--body-size);
+    line-height: 1.4;
+}
+
+/* 7. Grids adapt to available space */
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 250px), 1fr));
+    gap: clamp(0.5rem, 1.5vw, 1rem);
+}
+
+/* 8. Images constrained to viewport */
+img, .image-container {
+    max-width: 100%;
+    max-height: min(50vh, 400px);
+    object-fit: contain;
+}
+
+/* Short viewports (< 700px height) */
+@media (max-height: 700px) {
+    :root {
+        --slide-padding: clamp(0.75rem, 3vw, 2rem);
+        --content-gap: clamp(0.4rem, 1.5vw, 1rem);
+        --title-size: clamp(1.25rem, 4.5vw, 2.5rem);
+        --h2-size: clamp(1rem, 3vw, 1.75rem);
+    }
+}
+
+/* Very short viewports (< 600px height) */
+@media (max-height: 600px) {
+    :root {
+        --slide-padding: clamp(0.5rem, 2.5vw, 1.5rem);
+        --content-gap: clamp(0.3rem, 1vw, 0.75rem);
+        --title-size: clamp(1.1rem, 4vw, 2rem);
+        --body-size: clamp(0.7rem, 1.2vw, 0.95rem);
+    }
+
+    .nav-dots, .keyboard-hint, .decorative {
+        display: none;
+    }
+}
+
+/* Extremely short (landscape phones, < 500px height) */
+@media (max-height: 500px) {
+    :root {
+        --slide-padding: clamp(0.4rem, 2vw, 1rem);
+        --title-size: clamp(1rem, 3.5vw, 1.5rem);
+        --h2-size: clamp(0.9rem, 2.5vw, 1.25rem);
+        --body-size: clamp(0.65rem, 1vw, 0.85rem);
+    }
+}
+
+/* Narrow viewports (< 600px width) */
+@media (max-width: 600px) {
+    :root {
+        --title-size: clamp(1.25rem, 7vw, 2.5rem);
+    }
+
+    .grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.2s !important;
+    }
+
+    html {
+        scroll-behavior: auto;
+    }
+}
+
+/* ===========================================
+   SHARED SLIDE CHROME
+   =========================================== */
+.grid-bg {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background-image:
+        linear-gradient(var(--grid-line) 1px, transparent 1px),
+        linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+    background-size: 8.333vw 8.333vw;
+}
+
+/* ===========================================
+   REVEAL ANIMATIONS
+   .visible is added by IntersectionObserver
+   =========================================== */
+.reveal {
+    opacity: 0;
+    transform: translateY(28px);
+    transition:
+        opacity var(--duration-normal) var(--ease-out-expo),
+        transform var(--duration-normal) var(--ease-out-expo);
+}
+.slide.visible .reveal { opacity: 1; transform: translateY(0); }
+
+/* Bars wipe in from the left */
+.reveal-bar {
+    transform-origin: left center;
+    transform: scaleX(0);
+    transition: transform 0.8s var(--ease-out-expo);
+}
+.slide.visible .reveal-bar { transform: scaleX(1); }
+
+/* Stagger helpers */
+.d1 { transition-delay: 0.08s; }
+.d2 { transition-delay: 0.2s; }
+.d3 { transition-delay: 0.34s; }
+.d4 { transition-delay: 0.48s; }
+.d5 { transition-delay: 0.62s; }
+.d6 { transition-delay: 0.78s; }
+
+/* ===========================================
+   SLIDE 1 — TITLE
+   Huge wordmark + one-line tagline + the
+   3-word problem/idea punchline.
+   =========================================== */
+.s1 .slide-content {
+    justify-content: center;
+    z-index: 1;
+}
+
+/* Two columns: words left, live map GIF right */
+.s1 .cols {
+    display: grid;
+    /* minmax(0, …) so the unbreakable FASTREADER word can't inflate its column */
+    grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+    gap: clamp(1.2rem, 4vw, 4rem);
+    align-items: center;
+    width: 100%;
+}
+.s1 .text-col {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: clamp(1rem, 3.5vh, 2.2rem);
+}
+@media (max-width: 700px) {
+    .s1 .cols { grid-template-columns: 1fr; }
+    .s1 .gif-frame { display: none; }
+}
+
+.s1 .accent-bar {
+    width: clamp(70px, 14vw, 180px);
+    height: clamp(10px, 2vh, 18px);
+    background: var(--red);
+}
+
+.s1 h1 {
+    font-family: var(--font-display);
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: -0.03em;
+    line-height: 0.92;
+    font-size: clamp(2.4rem, 6.5vw, 6rem);
+}
+.s1 h1 em { font-style: normal; color: var(--red); }
+
+.s1 .tagline {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: clamp(1.2rem, 3.2vw, 2.4rem);
+    color: var(--ink);
+    max-width: 30ch;
+    line-height: 1.25;
+}
+
+/* The whole pitch in three words */
+.s1 .punch {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: clamp(0.9rem, 3vw, 2.4rem);
+    font-family: var(--font-display);
+    font-weight: 800;
+    text-transform: uppercase;
+    font-size: clamp(1rem, 2.8vw, 2rem);
+    margin-top: clamp(0.4rem, 1.5vh, 1rem);
+}
+.s1 .punch .dead {
+    color: var(--muted);
+    text-decoration: line-through;
+    text-decoration-color: var(--red);
+    text-decoration-thickness: clamp(2px, 0.4vw, 5px);
+}
+.s1 .punch .win {
+    color: var(--red);
+    font-size: clamp(1.5rem, 4.2vw, 3.2rem);
+}
+
+/* Live zoom GIFs — Swiss framing: hard black border, red corner tab */
+.gif-frame {
+    position: relative;
+    justify-self: center;
+    border: clamp(3px, 0.5vw, 6px) solid var(--ink);
+    line-height: 0;
+    background: var(--ink);
+}
+.gif-frame img {
+    display: block;
+    width: 100%;
+    height: auto;
+    max-height: min(58vh, 480px);
+    object-fit: cover;
+}
+/* red corner square, like a registration mark */
+.gif-frame::after {
+    content: '';
+    position: absolute;
+    top: calc(-1 * clamp(8px, 1.4vw, 14px));
+    right: calc(-1 * clamp(8px, 1.4vw, 14px));
+    width: clamp(16px, 2.8vw, 28px);
+    height: clamp(16px, 2.8vw, 28px);
+    background: var(--red);
+}
+.s1 .gif-frame { width: 100%; max-width: min(58vh, 440px); }
+.s1 .gif-frame img { aspect-ratio: 1 / 1; }
+
+/* ===========================================
+   SLIDE 2 — HOW IT WORKS
+   The pyramid IS the slide: four giant bars,
+   one anchor line, four time labels.
+   =========================================== */
+.s2 .slide-content {
+    z-index: 1;
+    justify-content: center;
+    gap: clamp(2.6rem, 7vh, 4rem); /* headroom for the "you are here" tag above the pyramid */
+}
+
+.s2 h2 {
+    font-family: var(--font-display);
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: -0.02em;
+    line-height: 1.0;
+    font-size: clamp(2rem, 6.5vw, 5rem);
+}
+.s2 h2 em { font-style: normal; color: var(--red); }
+
+/* Pyramid + live book GIF, side by side */
+.s2 .cols {
+    display: grid;
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+    gap: clamp(1.2rem, 4.5vw, 4.5rem);
+    align-items: center;
+    width: min(94vw, 1250px);
+}
+.s2 .gif-frame { width: 100%; max-width: min(40vw, 520px); }
+@media (max-width: 700px) {
+    .s2 .cols { grid-template-columns: 1fr; }
+    .s2 .gif-frame { display: none; }
+}
+
+/* Pyramid: bars widening downward, anchor line through them */
+.pyramid {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: clamp(0.7rem, 2.4vh, 1.6rem);
+    width: 100%;
+}
+.pyr-row {
+    display: flex;
+    align-items: center;
+    gap: clamp(0.8rem, 2vw, 1.6rem);
+}
+.pyr-bar {
+    height: clamp(30px, 7.5vh, 68px);
+    background: var(--ink);
+}
+/* anchor-tag + anchor-line are children 1–2, so rows are children 3–6 */
+.pyr-row:nth-child(3) .pyr-bar { width: 15%; background: var(--red); }
+.pyr-row:nth-child(4) .pyr-bar { width: 35%; }
+.pyr-row:nth-child(5) .pyr-bar { width: 58%; }
+.pyr-row:nth-child(6) .pyr-bar { width: 80%; }
+
+.pyr-label {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: clamp(0.95rem, 2.4vw, 1.7rem);
+    letter-spacing: 0.03em;
+    white-space: nowrap;
+    color: var(--ink);
+}
+.pyr-label small {
+    display: block;
+    font-weight: 700;
+    font-size: clamp(0.6rem, 1.3vw, 0.95rem);
+    color: var(--muted);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+/* The anchor: a red line through every level — your place never moves */
+.anchor-line {
+    position: absolute;
+    top: calc(-1 * clamp(0.6rem, 2vh, 1.4rem));
+    bottom: 0;
+    left: 9%;
+    width: clamp(3px, 0.4vw, 6px);
+    background: var(--red);
+    z-index: 2;
+}
+.anchor-line::after {
+    content: '';
+    position: absolute;
+    top: calc(-1 * clamp(7px, 1vw, 12px));
+    left: 50%;
+    transform: translateX(-50%);
+    width: clamp(14px, 2vw, 24px);
+    height: clamp(14px, 2vw, 24px);
+    background: var(--red);
+    border-radius: 50%;
+}
+.anchor-tag {
+    position: absolute;
+    top: calc(-1 * clamp(2rem, 5.5vh, 3.4rem));
+    left: 9%;
+    transform: translateX(-50%);
+    font-family: var(--font-display);
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    font-size: clamp(0.6rem, 1.3vw, 0.95rem);
+    color: var(--red);
+    white-space: nowrap;
+}
+
+/* "Demo →" transition marker */
+.s2 .next-up {
+    position: absolute;
+    bottom: clamp(1.2rem, 5vh, 3rem);
+    right: var(--slide-padding);
+    font-family: var(--font-display);
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-size: clamp(0.9rem, 2.2vw, 1.5rem);
+    color: var(--ink);
+    border: 3px solid var(--ink);
+    padding: clamp(0.45rem, 1.4vh, 0.8rem) clamp(0.8rem, 2.2vw, 1.5rem);
+    z-index: 2;
+}
+.s2 .next-up span { color: var(--red); }
+
+/* ===========================================
+   NAVIGATION CHROME — progress bar + dots
+   =========================================== */
+.progress-bar {
+    position: fixed;
+    top: 0; left: 0;
+    height: 4px;
+    width: 0;
+    background: var(--red);
+    z-index: 100;
+    transition: width 0.25s ease;
+}
+
+.nav-dots {
+    position: fixed;
+    right: clamp(0.6rem, 1.5vw, 1.4rem);
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    z-index: 100;
+}
+.nav-dot {
+    width: 10px; height: 10px;
+    border: 2px solid var(--ink);
+    background: transparent;
+    border-radius: 50%;
+    cursor: pointer;
+    padding: 0;
+    transition: background 0.2s ease, transform 0.2s ease;
+}
+.nav-dot.active { background: var(--red); border-color: var(--red); transform: scale(1.25); }
+
+.keyboard-hint {
+    position: fixed;
+    bottom: clamp(0.6rem, 2vh, 1.2rem);
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: clamp(0.6rem, 1vw, 0.75rem);
+    color: var(--muted);
+    z-index: 100;
+    opacity: 0.8;
+}
+</style>
+</head>
+<body>
+
+<!-- Fixed chrome -->
+<div class="progress-bar" aria-hidden="true"></div>
+<nav class="nav-dots" aria-label="Slide navigation"></nav>
+<div class="keyboard-hint">← → or Space to navigate</div>
+
+<!-- ===========================================
+     SLIDE 1 — TITLE
+     =========================================== -->
+<section class="slide s1" aria-label="FastReader title slide">
+    <div class="grid-bg" aria-hidden="true"></div>
+
+    <div class="slide-content">
+        <div class="cols">
+            <div class="text-col">
+                <div class="accent-bar reveal-bar" aria-hidden="true"></div>
+                <h1 class="reveal d1">Fast<em>Reader</em></h1>
+                <p class="tagline reveal d2">Read a long document like browsing a&nbsp;map.</p>
+                <div class="punch reveal d3">
+                    <span class="dead">Summary</span>
+                    <span class="dead">Full text</span>
+                    <span class="win">Zoom.</span>
+                </div>
+            </div>
+            <!-- Real Google Maps zooming in and out, captured live -->
+            <div class="gif-frame reveal d4">
+                <img src="demo-slides-assets/map-zoom.gif" alt="Google Maps zooming in and out over San Francisco">
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ===========================================
+     SLIDE 2 — HOW IT WORKS
+     =========================================== -->
+<section class="slide s2" aria-label="How FastReader works">
+    <div class="grid-bg" aria-hidden="true"></div>
+
+    <div class="slide-content">
+        <h2 class="reveal">Same story.<br><em>Four altitudes.</em></h2>
+
+        <div class="cols">
+            <!-- The pyramid: four rewrites of one document, anchored in place -->
+            <div class="pyramid" role="img" aria-label="Four reading levels from a 25-second gist to the full text, with a fixed anchor line through all of them">
+                <div class="anchor-tag reveal d5">You are here</div>
+                <div class="anchor-line reveal d5" aria-hidden="true"></div>
+                <div class="pyr-row"><div class="pyr-bar reveal-bar d1"></div><div class="pyr-label reveal d1">25 sec<small>Gist</small></div></div>
+                <div class="pyr-row"><div class="pyr-bar reveal-bar d2"></div><div class="pyr-label reveal d2">3 min<small>Overview</small></div></div>
+                <div class="pyr-row"><div class="pyr-bar reveal-bar d3"></div><div class="pyr-label reveal d3">26 min<small>Chapters</small></div></div>
+                <div class="pyr-row"><div class="pyr-bar reveal-bar d4"></div><div class="pyr-label reveal d4">Full text<small>Every word</small></div></div>
+            </div>
+            <!-- FastReader itself zooming through Alice in Wonderland, captured live -->
+            <div class="gif-frame reveal d4">
+                <img src="demo-slides-assets/book-zoom.gif" alt="FastReader zooming through the levels of Alice's Adventures in Wonderland">
+            </div>
+        </div>
+    </div>
+
+    <div class="next-up reveal d6">Demo <span>→</span></div>
+</section>
+
+<script>
+/* ===========================================
+   SLIDE PRESENTATION CONTROLLER
+   Keyboard, wheel, touch navigation; progress
+   bar; nav dots; reveal-on-visible animations.
+   =========================================== */
+class SlidePresentation {
+    constructor() {
+        this.slides = Array.from(document.querySelectorAll('.slide'));
+        this.dotsContainer = document.querySelector('.nav-dots');
+        this.progressBar = document.querySelector('.progress-bar');
+        this.current = 0;
+
+        this.setupIntersectionObserver();
+        this.setupNavDots();
+        this.setupKeyboardNav();
+        this.setupTouchNav();
+        this.updateChrome();
+        window.addEventListener('scroll', () => this.onScroll(), { passive: true });
+    }
+
+    /* Adds .visible when a slide enters — triggers CSS reveals */
+    setupIntersectionObserver() {
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach((entry) => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    this.current = this.slides.indexOf(entry.target);
+                    this.updateChrome();
+                }
+            });
+        }, { threshold: 0.55 });
+        this.slides.forEach((s) => observer.observe(s));
+    }
+
+    /* One dot per slide; clear first to avoid duplicates on re-open */
+    setupNavDots() {
+        this.dotsContainer.innerHTML = '';
+        this.slides.forEach((_, i) => {
+            const dot = document.createElement('button');
+            dot.className = 'nav-dot';
+            dot.setAttribute('aria-label', `Go to slide ${i + 1}`);
+            dot.addEventListener('click', () => this.goTo(i));
+            this.dotsContainer.appendChild(dot);
+        });
+    }
+
+    setupKeyboardNav() {
+        document.addEventListener('keydown', (e) => {
+            if (['ArrowDown', 'ArrowRight', ' ', 'PageDown'].includes(e.key)) {
+                e.preventDefault();
+                this.goTo(this.current + 1);
+            } else if (['ArrowUp', 'ArrowLeft', 'PageUp'].includes(e.key)) {
+                e.preventDefault();
+                this.goTo(this.current - 1);
+            } else if (e.key === 'Home') {
+                this.goTo(0);
+            } else if (e.key === 'End') {
+                this.goTo(this.slides.length - 1);
+            }
+        });
+    }
+
+    /* Vertical swipe → previous/next slide */
+    setupTouchNav() {
+        let startY = null;
+        document.addEventListener('touchstart', (e) => { startY = e.touches[0].clientY; }, { passive: true });
+        document.addEventListener('touchend', (e) => {
+            if (startY === null) return;
+            const dy = startY - e.changedTouches[0].clientY;
+            if (Math.abs(dy) > 60) this.goTo(this.current + (dy > 0 ? 1 : -1));
+            startY = null;
+        }, { passive: true });
+    }
+
+    goTo(index) {
+        const i = Math.max(0, Math.min(this.slides.length - 1, index));
+        this.slides[i].scrollIntoView({ behavior: 'smooth' });
+    }
+
+    onScroll() {
+        const max = document.documentElement.scrollHeight - window.innerHeight;
+        const pct = max > 0 ? (window.scrollY / max) * 100 : 0;
+        this.progressBar.style.width = pct + '%';
+    }
+
+    updateChrome() {
+        Array.from(this.dotsContainer.children).forEach((dot, i) => {
+            dot.classList.toggle('active', i === this.current);
+        });
+        this.onScroll();
+    }
+}
+
+new SlidePresentation();
+</script>
+</body>
+</html>
