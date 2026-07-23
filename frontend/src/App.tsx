@@ -8,8 +8,10 @@ export default function App() {
   const [docs, setDocs] = useState<DocSummary[]>([]);
   const [open, setOpen] = useState<FastDoc | null>(null);
   const [error, setError] = useState('');
-  useEffect(() => { fetchSummaries().then(setDocs).catch((e) => setError(String(e))); }, []);
+  const refresh = () => fetchSummaries().then(setDocs).catch((e) => setError(String(e)));
+  useEffect(() => { refresh(); }, []);
   if (error) return <div className="p-10 font-sans text-red-400">{error}</div>;
   if (open) return <Reader doc={open} onBack={() => setOpen(null)} />;
-  return <Library docs={docs} onOpen={(id) => fetchDoc(id).then(setOpen).catch((e) => setError(String(e)))} />;
+  return <Library docs={docs} onRefresh={refresh}
+    onOpen={(id) => fetchDoc(id).then(setOpen).catch((e) => setError(String(e)))} />;
 }
