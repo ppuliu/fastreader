@@ -7,11 +7,13 @@ RUN npm run build
 
 FROM python:3.12-slim
 WORKDIR /app
+# claude-agent-sdk ships a self-contained bundled CLI binary — no Node needed.
 COPY backend/requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
 COPY backend/app ./app
+COPY scripts ./scripts
 COPY data/builtin ./data/builtin
 COPY --from=fe /fe/dist ./static
-ENV BUILTIN_DIR=/app/data/builtin STATIC_DIR=/app/static
+ENV BUILTIN_DIR=/app/data/builtin STATIC_DIR=/app/static DATA_DIR=/data
 EXPOSE 8000
 CMD ["sh", "-c", "uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}"]
