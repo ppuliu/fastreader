@@ -1,16 +1,47 @@
+import { useEffect, useRef } from 'react';
 import type { LevelMeta } from '../lib/doc';
 import { readingTime } from '../lib/doc';
 
 const fmtWords = (w: number) =>
   w >= 1000 ? `${(w / 1000).toFixed(w < 10000 ? 1 : 0)}k` : `${w}`;
 
-export function AltitudeDial({ levels, current, active, onJump }:
-  { levels: LevelMeta[]; current: number; active: boolean; onJump: (level: number) => void }) {
+export function AltitudeDial({ levels, current, active, onJump, onStep }:
+  { levels: LevelMeta[]; current: number; active: boolean;
+    onJump: (level: number) => void; onStep: (dir: 1 | -1) => void }) {
+  const rootRef = useRef<HTMLDivElement>(null);
+  const railRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = rootRef.current;
+    if (!el) return;
+    let acc = 0;
+    const wheel = (e: WheelEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      acc += e.deltaY;
+      if (Math.abs(acc) >= 60) { onStep(acc > 0 ? 1 : -1); acc = 0; } // scroll down = deeper
+    };
+    el.addEventListener('wheel', wheel, { passive: false });
+    return () => el.removeEventListener('wheel', wheel);
+  }, [onStep]);
+
+  const dragTo = (clientY: number) => {
+    const rail = railRef.current;
+    if (!rail) return;
+    const r = rail.getBoundingClientRect();
+    const frac = Math.min(1, Math.max(0, (clientY - r.top) / r.height));
+    const idx = Math.round(frac * (levels.length - 1));
+    if (idx !== current) onJump(idx);
+  };
+
   return (
-    <div data-dial className="fixed right-5 top-1/2 -translate-y-1/2 z-20 select-none">
+    <div ref={rootRef} data-dial className="fixed right-5 top-1/2 -translate-y-1/2 z-20 select-none">
       {/* rail */}
-      <div className={`flex flex-col items-end gap-6 transition-opacity duration-500 ${
-        active ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
+      <div ref={railRef}
+        onPointerDown={(e) => { e.currentTarget.setPointerCapture(e.pointerId); dragTo(e.clientY); }}
+        onPointerMove={(e) => { if (e.buttons === 1) dragTo(e.clientY); }}
+        className={`flex flex-col items-end gap-6 transition-opacity duration-500 ${
+          active ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
         {levels.map((l, i) => (
           <button key={i} onClick={() => onJump(i)}
             className="group flex items-center gap-2.5 cursor-pointer">
