@@ -219,3 +219,6 @@ __marimo__/
 
 # Superpowers brainstorming artifacts
 .superpowers/
+
+# lib/ above is for Python build artifacts — keep frontend source
+!frontend/src/lib/
