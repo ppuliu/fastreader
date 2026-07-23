@@ -28,6 +28,15 @@ jobs = JobStore(DATA_DIR / "jobs")
 
 app = FastAPI(title="FastReader")
 
+
+@app.on_event("startup")
+def fail_orphaned_jobs():
+    """Jobs whose worker died with a previous container must not spin forever."""
+    for job in jobs.list(limit=100):
+        if job["status"] in ("queued", "processing"):
+            jobs.update(job["id"], status="failed", detail="failed",
+                        error="processing was interrupted by a server restart — please upload again")
+
 MAX_UPLOAD_CHARS = 400_000
 MIN_UPLOAD_WORDS = 120
 

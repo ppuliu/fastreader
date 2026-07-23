@@ -83,3 +83,11 @@ def test_jobs_listing(app_env, fake_pipeline):
     listed = client.get("/api/jobs").json()
     assert len(listed) == 2
     assert listed[0]["title"] == "Two"  # newest first
+
+
+def test_orphaned_jobs_failed_on_startup(app_env):
+    job = app_env.jobs.create(doc_id="ghost", title="Ghost")
+    app_env.jobs.update(job["id"], status="processing")
+    with TestClient(app_env.app):  # context manager triggers startup events
+        pass
+    assert app_env.jobs.get(job["id"])["status"] == "failed"
