@@ -23,13 +23,15 @@ Zoom back out when it doesn't.
 Open a document. It starts at the top level — the whole thing in one paragraph. The
 dial on the right shows every level with its name and reading time.
 
-| Input | What it does |
-|---|---|
-| Scroll | Read within the current level |
-| Select any passage | A "dive" popover appears — click to expand that passage |
-| Pinch, or hold any modifier key and scroll | Zoom in and out at your pointer |
-| Double-click a paragraph | Dive into it (shift + double-click to go back up) |
-| The dial: click a stop, drag, or use + / − | Jump levels directly |
+
+| Input                                      | What it does                                            |
+| ------------------------------------------ | ------------------------------------------------------- |
+| Scroll                                     | Read within the current level                           |
+| Select any passage                         | A "dive" popover appears — click to expand that passage |
+| Pinch, or hold any modifier key and scroll | Zoom in and out at your pointer                         |
+| Double-click a paragraph                   | Dive into it (shift + double-click to go back up)       |
+| The dial: click a stop, drag, or use + / − | Jump levels directly                                    |
+
 
 Zooming in drops you exactly where you were reading: if you were 70% through a
 chapter's one-paragraph version, you land 70% through its expanded scenes. A brief
@@ -160,29 +162,30 @@ one is earned.
 ## How I would extend this with more time
 
 1. **Build it as a Chrome extension.** Most long-document reading happens in the
-   browser — papers, blog posts, documentation. Zooming any page in place, without
-   copy-pasting into an app, is where this gets genuinely useful.
+ browser — papers, blog posts, documentation. Zooming any page in place, without
+ copy-pasting into an app, is where this gets genuinely useful.
 2. **Fine-tune the rewrite agent.** More work on making each level maximally cohesive
-   at its depth — the difference between a good rewrite and one that reads like the
-   author wrote that edition themselves.
+ at its depth — the difference between a good rewrite and one that reads like the
+ author wrote that edition themselves.
 3. **Richer reading.** Keep the source's text styling, and carry images and figures
-   from books and papers through to every level.
+ from books and papers through to every level.
 4. **[Exploration] Real-time rewriting with a very fast model.** If something like
-   Haiku can rewrite on the fly as you zoom, preprocessing disappears entirely — and
-   with it the fixed level count. Zoom becomes truly continuous: any passage, at any
-   depth, generated the moment you ask for it.
+ Haiku can rewrite on the fly as you zoom, preprocessing disappears entirely — and
+ with it the fixed level count. Zoom becomes truly continuous: any passage, at any
+ depth, generated the moment you ask for it.
 5. **Smarter payloads for scale.** Today the reader downloads a document's entire
-   level pyramid in one response — great for instant zoom, but it won't survive much
-   bigger documents or slow connections. A better design: fetch only the level you're
-   on plus a window around your position, prefetch the levels above and below your
-   current spot (those are the only places a zoom can land), and let a CDN cache the
-   immutable document chunks. The alignment spans already give every segment a stable
-   address, so the API can serve any slice of any level without the client losing its
-   place.
+ level pyramid in one response — great for instant zoom, but it won't survive much
+ bigger documents or slow connections. A better design: fetch only the level you're
+ on plus a window around your position, prefetch the levels above and below your
+ current spot (those are the only places a zoom can land), and let a CDN cache the
+ immutable document chunks. The alignment spans already give every segment a stable
+ address, so the API can serve any slice of any level without the client losing its
+ place.
 6. **Product plumbing.** User accounts and auth, PDF upload and fetch-from-URL, and a
-   chat panel for asking questions about the book you're reading.
+ chat panel for asking questions about the book you're reading.
 
----
+## How long I spent
 
-Design spec: `docs/superpowers/specs/2026-07-23-fastreader-design.md` ·
-Implementation plan: `docs/superpowers/plans/2026-07-23-fastreader-phase1.md`
+About 3 hours: started around 1:30pm PST on July 23rd and finished around 5:00pm, with
+some breaks in between. That includes building both phases, writing this README, and
+recording the demo video.
