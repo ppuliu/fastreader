@@ -5,6 +5,10 @@
 Live at [fastreader.honglei.ai](https://fastreader.honglei.ai/) · built in one Claude Code
 session — [read the full transcript](https://fastreader.honglei.ai/transcripts/)
 
+[![FastReader demo video — Zoom Through Any Long Document (10 min)](https://cdn.loom.com/sessions/thumbnails/f890992752ff463f80ae21d7728306a1-028a218cfc414ea8.gif)](https://www.loom.com/share/f890992752ff463f80ae21d7728306a1)
+
+*▶ [Watch the demo video](https://www.loom.com/share/f890992752ff463f80ae21d7728306a1)*
+
 ## What is FastReader
 
 Long documents give you a bad choice: read a summary and miss the depth, or read the
