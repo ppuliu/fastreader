@@ -2,7 +2,8 @@
 
 **Read a book the way you browse a map — zoom out for the whole story, zoom in where it gets interesting.**
 
-Live at [fastreader.honglei.ai](https://fastreader.honglei.ai/)
+Live at [fastreader.honglei.ai](https://fastreader.honglei.ai/) · built in one Claude Code
+session — [read the full transcript](https://fastreader.honglei.ai/transcripts/)
 
 ## What is FastReader
 
