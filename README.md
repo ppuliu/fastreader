@@ -151,9 +151,11 @@ live on a persistent volume; job status is one small JSON file per job. A databa
 earns its place when accounts or multiple servers arrive — the storage layer is a
 30-line class, so swapping it later is cheap.
 
-**Deploys kill in-flight processing jobs.** Accepted for now: on restart the backend
-marks orphaned jobs as failed with an honest "interrupted by a server restart" message,
-and dismissing a failed card deletes it for good. A durable job queue can come later.
+**Restarts recover in-flight jobs instead of losing them.** A deploy kills whatever the
+agent was writing, but the raw text is already on disk — so on startup the backend
+requeues interrupted jobs and reruns them (bounded to two retries, then an honest
+failure card the user can dismiss). Cheaper than a durable job queue, good enough until
+one is earned.
 
 ## How I would extend this with more time
 
