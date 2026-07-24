@@ -10,7 +10,6 @@ import os
 from pathlib import Path
 
 from claude_agent_sdk import (
-    AssistantMessage,
     ClaudeAgentOptions,
     ResultMessage,
     create_sdk_mcp_server,
@@ -25,27 +24,31 @@ SYSTEM_PROMPT = """You are FastReader's rewrite engine. You turn one document in
 pyramid of true rewrites, so a reader can zoom between depth levels like Google Maps
 zooms a map.
 
-Work strictly through your two tools:
+Work strictly through your tools, in this order:
 1. Read the whole document with get_source (numbered sections and paragraphs, plus
    the required level plan). Long documents come in numbered parts — call
    get_source with part=1, then part=2, and so on until the part marked
    [END OF DOCUMENT]. Never start writing before you have read every part.
-2. Write the rewrites and call submit_rewrites. If it returns errors, fix them and
-   submit again until it succeeds.
+2. Call submit_meta once with the level names and the gist.
+3. Write each mid level top-down (coarsest first) with submit_level, in batches:
+   never more than 20 segments per call. The first batch for a level uses
+   append=false, every following batch for that level uses append=true. Each call
+   echoes the running segment count and units sum for that level — use it to keep
+   your bookkeeping straight.
+4. When every level is submitted, call finalize. If it reports an error, fix the
+   offending level (resubmit it with append=false, in batches) and call finalize
+   again until it succeeds.
 
-The rewrites JSON you submit has exactly this shape:
-{
-  "level_names": [<n_mids + 2 short names, top-down: gist level first, full-text level last>],
-  "gist": "<one paragraph, 70-110 words, the whole document>",
-  "mids": [ { "segments": [ { "text": "...", "heading": "optional", "units": <int> } ] }, ... ]
-}
+submit_level segments_json is a JSON array of segments, each:
+  { "text": "...", "heading": "optional", "units": <int> }
 
 Rules:
-- mids are ordered top-down (coarsest first). Each segment's `units` counts how many
-  segments of the NEXT level down it covers, consumed contiguously in reading order.
-  The deepest mid's units count full-text paragraphs; they must sum exactly to the
-  paragraph total, and every mid's units must sum to the segment count of the level
-  below it. Choose unit boundaries at real topic/scene shifts, never mid-thought.
+- Mid levels are indexed top-down: level 0 is the coarsest. Each segment's `units`
+  counts how many segments of the NEXT level down it covers, consumed contiguously
+  in reading order. The deepest mid's units count full-text paragraphs; they must
+  sum exactly to the paragraph total, and every mid's units must sum to the segment
+  count of the level below it. Choose unit boundaries at real topic/scene shifts,
+  never mid-thought.
 - Each level must read as ONE continuous document at that depth: flowing prose in
   present tense, faithful to exactly the span its units cover. Never write
   bullet lists, never write summarese ("this chapter discusses...", "the author
@@ -55,12 +58,76 @@ Rules:
 - Where the source has named sections, put each section's title in the `heading`
   field of the segment that starts that section's coverage (at the levels where
   segments align with those sections).
+- The gist is one paragraph, 70-110 words, covering the whole document.
 - Level names are short (1-4 words), document-specific, and evocative - they label
   the dial stops a reader travels ("In one breath", "The argument", "Every word").
   Never generic labels like "Level 1" or "Summary".
 
-Do not use any other tools. Do not write files. Work in this order: read every
-get_source part, think through the structure, then submit."""
+Do not use any other tools. Do not write files."""
+
+
+class RewriteAssembly:
+    """Accumulates the agent's incremental submissions and assembles the document.
+
+    Splitting the submission into per-level batches keeps every generation turn far
+    below output-token limits (a whole novel's rewrites cannot fit in one tool call)
+    and makes a validation error cost one level, not the whole pyramid.
+    """
+
+    def __init__(self, *, n_mids: int, work: dict, doc_meta: dict):
+        self.n_mids = n_mids
+        self.work = work
+        self.doc_meta = doc_meta
+        self.level_names: list[str] | None = None
+        self.gist: str | None = None
+        self.mids: list[list[dict]] = [[] for _ in range(n_mids)]
+
+    def set_meta(self, level_names, gist) -> str | None:
+        if not isinstance(level_names, list) or len(level_names) != self.n_mids + 2:
+            got = len(level_names) if isinstance(level_names, list) else type(level_names).__name__
+            return f"level_names must be a list of exactly {self.n_mids + 2} entries (got {got})"
+        if not isinstance(gist, str) or not gist.strip():
+            return "gist must be a non-empty paragraph"
+        self.level_names = [str(n) for n in level_names]
+        self.gist = gist.strip()
+        return None
+
+    def add_segments(self, level, segments, *, append: bool):
+        """Returns (error, summary); on success error is None."""
+        if not isinstance(level, int) or not 0 <= level < self.n_mids:
+            return f"level must be an integer between 0 and {self.n_mids - 1}", None
+        if not isinstance(segments, list) or not segments:
+            return "segments_json must be a non-empty JSON array", None
+        parsed = []
+        for i, s in enumerate(segments):
+            if (not isinstance(s, dict) or not str(s.get("text", "")).strip()
+                    or not isinstance(s.get("units"), int) or s["units"] < 1):
+                return (f"segment {i}: each segment needs non-empty 'text' and an "
+                        f"integer 'units' >= 1", None)
+            seg = {"text": str(s["text"]).strip(), "units": s["units"]}
+            if s.get("heading"):
+                seg["heading"] = str(s["heading"])
+            parsed.append(seg)
+        if append:
+            self.mids[level].extend(parsed)
+        else:
+            self.mids[level] = parsed
+        units = sum(s["units"] for s in self.mids[level])
+        return None, f"level {level}: {len(self.mids[level])} segments, units sum {units}"
+
+    def finalize(self):
+        """Returns (doc, error); on success error is None."""
+        if self.level_names is None:
+            return None, "submit_meta has not been called yet"
+        empty = [i for i, segs in enumerate(self.mids) if not segs]
+        if empty:
+            return None, "no segments submitted for level " + ", level ".join(map(str, empty))
+        rewrites = {"level_names": self.level_names, "gist": self.gist,
+                    "mids": [{"segments": segs} for segs in self.mids], **self.doc_meta}
+        try:
+            return assemble(rewrites, self.work), None
+        except (ValueError, KeyError, TypeError) as e:
+            return None, str(e)
 
 
 def _status_noop(detail: str) -> None:
@@ -112,6 +179,9 @@ async def run_pipeline(raw_text: str, *, doc_id: str, title: str, author: str,
 
     state: dict = {"doc": None, "attempts": 0}
     pages = source_pages(work)
+    assembly = RewriteAssembly(
+        n_mids=n_mids, work=work,
+        doc_meta={"id": doc_id, "title": title, "author": author, "kind": kind})
 
     @tool(name="get_source",
           description="Read the document: stats, required level plan, and every section/paragraph, "
@@ -138,37 +208,61 @@ async def run_pipeline(raw_text: str, *, doc_id: str, title: str, author: str,
                   else f"\n[continued in part {part + 1} of {len(pages)}]")
         return {"content": [{"type": "text", "text": "\n".join(header) + pages[part - 1] + footer}]}
 
-    @tool(name="submit_rewrites",
-          description="Submit the rewrites JSON (as a string). Assembles and validates the "
-                      "document; returns errors to fix, or confirms success.",
-          input_schema={"rewrites_json": str})
-    async def submit_rewrites(args):
-        state["attempts"] += 1
-        status(f"validating rewrite attempt {state['attempts']}")
+    def _text(msg: str) -> dict:
+        return {"content": [{"type": "text", "text": msg}]}
+
+    @tool(name="submit_meta",
+          description="Submit the level names (JSON array of strings, top-down) and the gist "
+                      "paragraph. Call once before submitting levels.",
+          input_schema={"level_names_json": str, "gist": str})
+    async def submit_meta(args):
         try:
-            rewrites = json.loads(args["rewrites_json"])
+            names = json.loads(args.get("level_names_json") or "null")
         except json.JSONDecodeError as e:
-            return {"content": [{"type": "text", "text": f"ERROR: rewrites_json is not valid JSON: {e}"}]}
-        rewrites.update({"id": doc_id, "title": title, "author": author, "kind": kind})
-        names = rewrites.get("level_names") or []
-        if len(names) != n_mids + 2:
-            return {"content": [{"type": "text", "text":
-                    f"ERROR: level_names must have exactly {n_mids + 2} entries (got {len(names)})."}]}
-        if len(rewrites.get("mids") or []) != n_mids:
-            return {"content": [{"type": "text", "text":
-                    f"ERROR: mids must have exactly {n_mids} level(s) (got {len(rewrites.get('mids') or [])})."}]}
+            return _text(f"ERROR: level_names_json is not valid JSON: {e}")
+        err = assembly.set_meta(names, args.get("gist") or "")
+        if err:
+            return _text(f"ERROR: {err}")
+        status("agent set the level plan")
+        return _text(f"OK: {len(assembly.level_names)} level names and gist recorded. "
+                     f"Now submit mid levels 0..{n_mids - 1} with submit_level.")
+
+    @tool(name="submit_level",
+          description="Submit a batch of segments (JSON array, max 20) for one mid level "
+                      "(0 = coarsest). append=false starts the level over, append=true "
+                      "extends it. Echoes the level's running segment count and units sum.",
+          input_schema={"level": int, "segments_json": str, "append": bool})
+    async def submit_level(args):
         try:
-            doc = assemble(rewrites, work)
-        except (ValueError, KeyError, TypeError) as e:
-            return {"content": [{"type": "text", "text": f"ERROR: {e}"}]}
+            segments = json.loads(args.get("segments_json") or "null")
+        except json.JSONDecodeError as e:
+            return _text(f"ERROR: segments_json is not valid JSON: {e}")
+        err, summary = assembly.add_segments(args.get("level"), segments,
+                                             append=bool(args.get("append")))
+        if err:
+            return _text(f"ERROR: {err}")
+        status(f"agent is writing ({summary})")
+        return _text(f"OK: {summary}")
+
+    @tool(name="finalize",
+          description="Assemble and validate the document from everything submitted. "
+                      "Returns the error to fix, or confirms success.",
+          input_schema={})
+    async def finalize(args):
+        state["attempts"] += 1
+        status(f"validating (attempt {state['attempts']})")
+        doc, err = assembly.finalize()
+        if err:
+            return _text(f"ERROR: {err}")
         state["doc"] = doc
         words = [lvl["words"] for lvl in doc["levels"]]
-        return {"content": [{"type": "text", "text":
-                f"SUCCESS: document assembled and validated. Level word counts: {words}. You are done."}]}
+        return _text(f"SUCCESS: document assembled and validated. "
+                     f"Level word counts: {words}. You are done.")
 
     server = create_sdk_mcp_server(name="pipeline", version="1.0.0",
-                                   tools=[get_source, submit_rewrites])
-    tool_names = ["mcp__pipeline__get_source", "mcp__pipeline__submit_rewrites"]
+                                   tools=[get_source, submit_meta, submit_level, finalize])
+    tool_names = ["mcp__pipeline__get_source", "mcp__pipeline__submit_meta",
+                  "mcp__pipeline__submit_level", "mcp__pipeline__finalize"]
     stderr_tail: list[str] = []
 
     def collect_stderr(line: str) -> None:
@@ -184,7 +278,7 @@ async def run_pipeline(raw_text: str, *, doc_id: str, title: str, author: str,
                           "WebSearch", "WebFetch", "Task", "NotebookEdit"],
         permission_mode="bypassPermissions",
         setting_sources=[],
-        max_turns=30 + 2 * len(pages),
+        max_turns=80 + 2 * len(pages),
         # The container runs as root; Claude Code only allows bypassPermissions
         # there when explicitly marked as a sandbox.
         env={"IS_SANDBOX": "1"},
@@ -200,9 +294,7 @@ async def run_pipeline(raw_text: str, *, doc_id: str, title: str, author: str,
                    f"with part=1 and read every part before writing.",
             options=options,
         ):
-            if isinstance(message, AssistantMessage):
-                status(f"agent is writing (attempt {state['attempts'] + 1} of the rewrite)")
-            elif isinstance(message, ResultMessage):
+            if isinstance(message, ResultMessage):
                 result = message
     except Exception as e:
         hint = ("" if os.environ.get("ANTHROPIC_API_KEY")
