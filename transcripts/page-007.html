@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Claude Code transcript - page 7</title>
+    <style>
+:root { --bg-color: #f5f5f5; --card-bg: #ffffff; --user-bg: #e3f2fd; --user-border: #1976d2; --assistant-bg: #f5f5f5; --assistant-border: #9e9e9e; --thinking-bg: #fff8e1; --thinking-border: #ffc107; --thinking-text: #666; --tool-bg: #f3e5f5; --tool-border: #9c27b0; --tool-result-bg: #e8f5e9; --tool-error-bg: #ffebee; --text-color: #212121; --text-muted: #757575; --code-bg: #263238; --code-text: #aed581; }
+* { box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg-color); color: var(--text-color); margin: 0; padding: 16px; line-height: 1.6; }
+.container { max-width: 800px; margin: 0 auto; }
+h1 { font-size: 1.5rem; margin-bottom: 24px; padding-bottom: 8px; border-bottom: 2px solid var(--user-border); }
+.header-row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; border-bottom: 2px solid var(--user-border); padding-bottom: 8px; margin-bottom: 24px; }
+.header-row h1 { border-bottom: none; padding-bottom: 0; margin-bottom: 0; flex: 1; min-width: 200px; }
+.message { margin-bottom: 16px; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+.message.user { background: var(--user-bg); border-left: 4px solid var(--user-border); }
+.message.assistant { background: var(--card-bg); border-left: 4px solid var(--assistant-border); }
+.message.tool-reply { background: #fff8e1; border-left: 4px solid #ff9800; }
+.tool-reply .role-label { color: #e65100; }
+.tool-reply .tool-result { background: transparent; padding: 0; margin: 0; }
+.tool-reply .tool-result .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, #fff8e1); }
+.message-header { display: flex; justify-content: space-between; align-items: center; padding: 8px 16px; background: rgba(0,0,0,0.03); font-size: 0.85rem; }
+.role-label { font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+.user .role-label { color: var(--user-border); }
+time { color: var(--text-muted); font-size: 0.8rem; }
+.timestamp-link { color: inherit; text-decoration: none; }
+.timestamp-link:hover { text-decoration: underline; }
+.message:target { animation: highlight 2s ease-out; }
+@keyframes highlight { 0% { background-color: rgba(25, 118, 210, 0.2); } 100% { background-color: transparent; } }
+.message-content { padding: 16px; }
+.message-content p { margin: 0 0 12px 0; }
+.message-content p:last-child { margin-bottom: 0; }
+.thinking { background: var(--thinking-bg); border: 1px solid var(--thinking-border); border-radius: 8px; padding: 12px; margin: 12px 0; font-size: 0.9rem; color: var(--thinking-text); }
+.thinking-label { font-size: 0.75rem; font-weight: 600; text-transform: uppercase; color: #f57c00; margin-bottom: 8px; }
+.thinking p { margin: 8px 0; }
+.assistant-text { margin: 8px 0; }
+.tool-use { background: var(--tool-bg); border: 1px solid var(--tool-border); border-radius: 8px; padding: 12px; margin: 12px 0; }
+.tool-header { font-weight: 600; color: var(--tool-border); margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+.tool-icon { font-size: 1.1rem; }
+.tool-description { font-size: 0.9rem; color: var(--text-muted); margin-bottom: 8px; font-style: italic; }
+.tool-result { background: var(--tool-result-bg); border-radius: 8px; padding: 12px; margin: 12px 0; }
+.tool-result.tool-error { background: var(--tool-error-bg); }
+.file-tool { border-radius: 8px; padding: 12px; margin: 12px 0; }
+.write-tool { background: linear-gradient(135deg, #e3f2fd 0%, #e8f5e9 100%); border: 1px solid #4caf50; }
+.edit-tool { background: linear-gradient(135deg, #fff3e0 0%, #fce4ec 100%); border: 1px solid #ff9800; }
+.file-tool-header { font-weight: 600; margin-bottom: 4px; display: flex; align-items: center; gap: 8px; font-size: 0.95rem; }
+.write-header { color: #2e7d32; }
+.edit-header { color: #e65100; }
+.file-tool-icon { font-size: 1rem; }
+.file-tool-path { font-family: monospace; background: rgba(0,0,0,0.08); padding: 2px 8px; border-radius: 4px; }
+.file-tool-fullpath { font-family: monospace; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px; word-break: break-all; }
+.file-content { margin: 0; }
+.edit-section { display: flex; margin: 4px 0; border-radius: 4px; overflow: hidden; }
+.edit-label { padding: 8px 12px; font-weight: bold; font-family: monospace; display: flex; align-items: flex-start; }
+.edit-old { background: #fce4ec; }
+.edit-old .edit-label { color: #b71c1c; background: #f8bbd9; }
+.edit-old .edit-content { color: #880e4f; }
+.edit-new { background: #e8f5e9; }
+.edit-new .edit-label { color: #1b5e20; background: #a5d6a7; }
+.edit-new .edit-content { color: #1b5e20; }
+.edit-content { margin: 0; flex: 1; background: transparent; font-size: 0.85rem; }
+.edit-replace-all { font-size: 0.75rem; font-weight: normal; color: var(--text-muted); }
+.write-tool .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, #e6f4ea); }
+.edit-tool .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, #fff0e5); }
+.todo-list { background: linear-gradient(135deg, #e8f5e9 0%, #f1f8e9 100%); border: 1px solid #81c784; border-radius: 8px; padding: 12px; margin: 12px 0; }
+.todo-header { font-weight: 600; color: #2e7d32; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; font-size: 0.95rem; }
+.todo-items { list-style: none; margin: 0; padding: 0; }
+.todo-item { display: flex; align-items: flex-start; gap: 10px; padding: 6px 0; border-bottom: 1px solid rgba(0,0,0,0.06); font-size: 0.9rem; }
+.todo-item:last-child { border-bottom: none; }
+.todo-icon { flex-shrink: 0; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-weight: bold; border-radius: 50%; }
+.todo-completed .todo-icon { color: #2e7d32; background: rgba(46, 125, 50, 0.15); }
+.todo-completed .todo-content { color: #558b2f; text-decoration: line-through; }
+.todo-in-progress .todo-icon { color: #f57c00; background: rgba(245, 124, 0, 0.15); }
+.todo-in-progress .todo-content { color: #e65100; font-weight: 500; }
+.todo-pending .todo-icon { color: #757575; background: rgba(0,0,0,0.05); }
+.todo-pending .todo-content { color: #616161; }
+pre { background: var(--code-bg); color: var(--code-text); padding: 12px; border-radius: 6px; overflow-x: auto; font-size: 0.85rem; line-height: 1.5; margin: 8px 0; white-space: pre-wrap; word-wrap: break-word; }
+pre.json { color: #e0e0e0; }
+code { background: rgba(0,0,0,0.08); padding: 2px 6px; border-radius: 4px; font-size: 0.9em; }
+pre code { background: none; padding: 0; }
+.user-content { margin: 0; }
+.truncatable { position: relative; }
+.truncatable.truncated .truncatable-content { max-height: 200px; overflow: hidden; }
+.truncatable.truncated::after { content: ''; position: absolute; bottom: 32px; left: 0; right: 0; height: 60px; background: linear-gradient(to bottom, transparent, var(--card-bg)); pointer-events: none; }
+.message.user .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, var(--user-bg)); }
+.message.tool-reply .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, #fff8e1); }
+.tool-use .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, var(--tool-bg)); }
+.tool-result .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, var(--tool-result-bg)); }
+.expand-btn { display: none; width: 100%; padding: 8px 16px; margin-top: 4px; background: rgba(0,0,0,0.05); border: 1px solid rgba(0,0,0,0.1); border-radius: 6px; cursor: pointer; font-size: 0.85rem; color: var(--text-muted); }
+.expand-btn:hover { background: rgba(0,0,0,0.1); }
+.truncatable.truncated .expand-btn, .truncatable.expanded .expand-btn { display: block; }
+.pagination { display: flex; justify-content: center; gap: 8px; margin: 24px 0; flex-wrap: wrap; }
+.pagination a, .pagination span { padding: 5px 10px; border-radius: 6px; text-decoration: none; font-size: 0.85rem; }
+.pagination a { background: var(--card-bg); color: var(--user-border); border: 1px solid var(--user-border); }
+.pagination a:hover { background: var(--user-bg); }
+.pagination .current { background: var(--user-border); color: white; }
+.pagination .disabled { color: var(--text-muted); border: 1px solid #ddd; }
+.pagination .index-link { background: var(--user-border); color: white; }
+details.continuation { margin-bottom: 16px; }
+details.continuation summary { cursor: pointer; padding: 12px 16px; background: var(--user-bg); border-left: 4px solid var(--user-border); border-radius: 12px; font-weight: 500; color: var(--text-muted); }
+details.continuation summary:hover { background: rgba(25, 118, 210, 0.15); }
+details.continuation[open] summary { border-radius: 12px 12px 0 0; margin-bottom: 0; }
+.index-item { margin-bottom: 16px; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); background: var(--user-bg); border-left: 4px solid var(--user-border); }
+.index-item a { display: block; text-decoration: none; color: inherit; }
+.index-item a:hover { background: rgba(25, 118, 210, 0.1); }
+.index-item-header { display: flex; justify-content: space-between; align-items: center; padding: 8px 16px; background: rgba(0,0,0,0.03); font-size: 0.85rem; }
+.index-item-number { font-weight: 600; color: var(--user-border); }
+.index-item-content { padding: 16px; }
+.index-item-stats { padding: 8px 16px 12px 32px; font-size: 0.85rem; color: var(--text-muted); border-top: 1px solid rgba(0,0,0,0.06); }
+.index-item-commit { margin-top: 6px; padding: 4px 8px; background: #fff3e0; border-radius: 4px; font-size: 0.85rem; color: #e65100; }
+.index-item-commit code { background: rgba(0,0,0,0.08); padding: 1px 4px; border-radius: 3px; font-size: 0.8rem; margin-right: 6px; }
+.commit-card { margin: 8px 0; padding: 10px 14px; background: #fff3e0; border-left: 4px solid #ff9800; border-radius: 6px; }
+.commit-card a { text-decoration: none; color: #5d4037; display: block; }
+.commit-card a:hover { color: #e65100; }
+.commit-card-hash { font-family: monospace; color: #e65100; font-weight: 600; margin-right: 8px; }
+.index-commit { margin-bottom: 12px; padding: 10px 16px; background: #fff3e0; border-left: 4px solid #ff9800; border-radius: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+.index-commit a { display: block; text-decoration: none; color: inherit; }
+.index-commit a:hover { background: rgba(255, 152, 0, 0.1); margin: -10px -16px; padding: 10px 16px; border-radius: 8px; }
+.index-commit-header { display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; margin-bottom: 4px; }
+.index-commit-hash { font-family: monospace; color: #e65100; font-weight: 600; }
+.index-commit-msg { color: #5d4037; }
+.index-item-long-text { margin-top: 8px; padding: 12px; background: var(--card-bg); border-radius: 8px; border-left: 3px solid var(--assistant-border); }
+.index-item-long-text .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, var(--card-bg)); }
+.index-item-long-text-content { color: var(--text-color); }
+#search-box { display: none; align-items: center; gap: 8px; }
+#search-box input { padding: 6px 12px; border: 1px solid var(--assistant-border); border-radius: 6px; font-size: 16px; width: 180px; }
+#search-box button, #modal-search-btn, #modal-close-btn { background: var(--user-border); color: white; border: none; border-radius: 6px; padding: 6px 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+#search-box button:hover, #modal-search-btn:hover { background: #1565c0; }
+#modal-close-btn { background: var(--text-muted); margin-left: 8px; }
+#modal-close-btn:hover { background: #616161; }
+#search-modal[open] { border: none; border-radius: 12px; box-shadow: 0 4px 24px rgba(0,0,0,0.2); padding: 0; width: 90vw; max-width: 900px; height: 80vh; max-height: 80vh; display: flex; flex-direction: column; }
+#search-modal::backdrop { background: rgba(0,0,0,0.5); }
+.search-modal-header { display: flex; align-items: center; gap: 8px; padding: 16px; border-bottom: 1px solid var(--assistant-border); background: var(--bg-color); border-radius: 12px 12px 0 0; }
+.search-modal-header input { flex: 1; padding: 8px 12px; border: 1px solid var(--assistant-border); border-radius: 6px; font-size: 16px; }
+#search-status { padding: 8px 16px; font-size: 0.85rem; color: var(--text-muted); border-bottom: 1px solid rgba(0,0,0,0.06); }
+#search-results { flex: 1; overflow-y: auto; padding: 16px; }
+.search-result { margin-bottom: 16px; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+.search-result a { display: block; text-decoration: none; color: inherit; }
+.search-result a:hover { background: rgba(25, 118, 210, 0.05); }
+.search-result-page { padding: 6px 12px; background: rgba(0,0,0,0.03); font-size: 0.8rem; color: var(--text-muted); border-bottom: 1px solid rgba(0,0,0,0.06); }
+.search-result-content { padding: 12px; }
+.search-result mark { background: #fff59d; padding: 1px 2px; border-radius: 2px; }
+@media (max-width: 600px) { body { padding: 8px; } .message, .index-item { border-radius: 8px; } .message-content, .index-item-content { padding: 12px; } pre { font-size: 0.8rem; padding: 8px; } #search-box input { width: 120px; } #search-modal[open] { width: 95vw; height: 90vh; } }
+</style>
+</head>
+<body>
+    <div class="container">
+        <h1><a href="index.html" style="color: inherit; text-decoration: none;">Claude Code transcript</a> - page 7/11</h1>
+        
+
+<div class="pagination">
+<a href="index.html" class="index-link">Index</a>
+<a href="page-006.html">&larr; Prev</a>
+<a href="page-001.html">1</a>
+<a href="page-002.html">2</a>
+<a href="page-003.html">3</a>
+<a href="page-004.html">4</a>
+<a href="page-005.html">5</a>
+<a href="page-006.html">6</a>
+<span class="current">7</span>
+<a href="page-008.html">8</a>
+<a href="page-009.html">9</a>
+<a href="page-010.html">10</a>
+<a href="page-011.html">11</a>
+<a href="page-008.html">Next &rarr;</a>
+</div>
+
+        
+<div class="message user" id="msg-2026-07-23T21-54-03-893Z"><div class="message-header"><span class="role-label">User</span><a href="#msg-2026-07-23T21-54-03-893Z" class="timestamp-link"><time datetime="2026-07-23T21:54:03.893Z" data-timestamp="2026-07-23T21:54:03.893Z">2026-07-23T21:54:03.893Z</time></a></div><div class="message-content">
+<div class="user-content"><p>seeing this error Application failed to respond
+This error appears to be caused by the application.</p>
+<p>If this is your project, check out your deploy logs to see what went wrong. Refer to our docs on Fixing Common Errors for help, or reach out over our Help Station.</p>
+<p>If you are a visitor, please contact the application owner or try again later.</p>
+<p>Request ID:
+qh5b6k5WQqmrm7LE9fVATg when trying to open the deployed app at https://fastreader-production.up.railway.app/</p></div></div></div>
+<div class="message assistant" id="msg-2026-07-23T21-54-11-637Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-07-23T21-54-11-637Z" class="timestamp-link"><time datetime="2026-07-23T21:54:11.637Z" data-timestamp="2026-07-23T21:54:11.637Z">2026-07-23T21:54:11.637Z</time></a></div><div class="message-content">
+<div class="thinking"><div class="thinking-label">Thinking</div></div></div></div>
+<div class="message assistant" id="msg-2026-07-23T21-54-13-051Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-07-23T21-54-13-051Z" class="timestamp-link"><time datetime="2026-07-23T21:54:13.051Z" data-timestamp="2026-07-23T21:54:13.051Z">2026-07-23T21:54:13.051Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>The domain is live but the app isn't answering — and note the real domain is <code>fastreader-production.up.railway.app</code> (my poller was watching a guessed URL, so it saw nothing). Checking deployment status and runtime logs:</p></div></div></div>
+<div class="message assistant" id="msg-2026-07-23T21-54-14-472Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-07-23T21-54-14-472Z" class="timestamp-link"><time datetime="2026-07-23T21:54:14.472Z" data-timestamp="2026-07-23T21:54:14.472Z">2026-07-23T21:54:14.472Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01KMyS52B2ctJw6Rdo9aU28d"><div class="tool-header"><span class="tool-icon">⚙</span> mcp__claude_ai_railway__list-deployments</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;projectId&#34;: &#34;dd798dd3-36df-4a25-8794-08b181b54fe7&#34;,
+  &#34;serviceId&#34;: &#34;90abf7f3-dd4b-47fd-82f3-21da540f548a&#34;,
+  &#34;limit&#34;: 2
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-07-23T21-54-15-045Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-07-23T21-54-15-045Z" class="timestamp-link"><time datetime="2026-07-23T21:54:15.045Z" data-timestamp="2026-07-23T21:54:15.045Z">2026-07-23T21:54:15.045Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>{&quot;deployments&quot;:[{&quot;id&quot;:&quot;d7af620a-577e-4946-80df-aa5eef380d11&quot;,&quot;status&quot;:&quot;SUCCESS&quot;,&quot;createdAt&quot;:&quot;2026-07-23T21:51:25.500Z&quot;,&quot;updatedAt&quot;:&quot;2026-07-23T21:51:49.647Z&quot;,&quot;serviceId&quot;:&quot;90abf7f3-dd4b-47fd-82f3-21da540f548a&quot;,&quot;environmentId&quot;:&quot;1df021b9-83e2-4b35-8bc6-f086ceecb527&quot;,&quot;url&quot;:null,&quot;snapshotId&quot;:&quot;1b4c955a-3149-4e67-bbc7-3690f20e453b&quot;,&quot;meta&quot;:{&quot;reason&quot;:&quot;deploy&quot;,&quot;commitMessage&quot;:&quot;fix: un-ignore frontend/src/lib (Python .gitignore template shadowed it)\n\nCo-Authored-By: Claude Fable 5 &lt;noreply@anthropic.com&gt;\n\nCo-authored-by: Orca &lt;help@stably.ai&gt;&quot;,&quot;commitHash&quot;:&quot;9c13781eb52a8693d205079d7329e99c564371cc&quot;,&quot;branch&quot;:&quot;fastreader-phase1&quot;}},{&quot;id&quot;:&quot;d62c19cc-2c67-403f-a1e3-56b759446659&quot;,&quot;status&quot;:&quot;FAILED&quot;,&quot;createdAt&quot;:&quot;2026-07-23T21:50:43.263Z&quot;,&quot;updatedAt&quot;:&quot;2026-07-23T21:50:52.981Z&quot;,&quot;serviceId&quot;:&quot;90abf7f3-dd4b-47fd-82f3-21da540f548a&quot;,&quot;environmentId&quot;:&quot;1df021b9-83e2-4b35-8bc6-f086ceecb527&quot;,&quot;url&quot;:null,&quot;snapshotId&quot;:&quot;e9294547-0002-4d66-9a59-28c6a70b9b83&quot;,&quot;meta&quot;:{&quot;reason&quot;:&quot;deploy&quot;,&quot;commitMessage&quot;:&quot;feat: Docker image and deploy setup\n\nCo-Authored-By: Claude Fable 5 &lt;noreply@anthropic.com&gt;\n\nCo-authored-by: Orca &lt;help@stably.ai&gt;&quot;,&quot;commitHash&quot;:&quot;de9b8d370006fe79bcc5d1265d7d143e80a417dd&quot;,&quot;branch&quot;:&quot;fastreader-phase1&quot;}}]}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-07-23T21-54-15-851Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-07-23T21-54-15-851Z" class="timestamp-link"><time datetime="2026-07-23T21:54:15.851Z" data-timestamp="2026-07-23T21:54:15.851Z">2026-07-23T21:54:15.851Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_011igbBCxDVKEcyYDSncwMRN"><div class="tool-header"><span class="tool-icon">⚙</span> mcp__claude_ai_railway__get-logs</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;projectId&#34;: &#34;dd798dd3-36df-4a25-8794-08b181b54fe7&#34;,
+  &#34;serviceId&#34;: &#34;90abf7f3-dd4b-47fd-82f3-21da540f548a&#34;,
+  &#34;environmentId&#34;: &#34;1df021b9-83e2-4b35-8bc6-f086ceecb527&#34;,
+  &#34;types&#34;: [
+    &#34;deploy&#34;
+  ],
+  &#34;limit&#34;: 30
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-07-23T21-54-16-666Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-07-23T21-54-16-666Z" class="timestamp-link"><time datetime="2026-07-23T21:54:16.666Z" data-timestamp="2026-07-23T21:54:16.666Z">2026-07-23T21:54:16.666Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>{&quot;deploymentId&quot;:&quot;d7af620a-577e-4946-80df-aa5eef380d11&quot;,&quot;serviceId&quot;:&quot;90abf7f3-dd4b-47fd-82f3-21da540f548a&quot;,&quot;environmentId&quot;:&quot;1df021b9-83e2-4b35-8bc6-f086ceecb527&quot;,&quot;status&quot;:&quot;SUCCESS&quot;,&quot;deploy&quot;:[{&quot;timestamp&quot;:&quot;2026-07-23T21:51:47.965406740Z&quot;,&quot;severity&quot;:&quot;info&quot;,&quot;message&quot;:&quot;Starting Container&quot;,&quot;attributes&quot;:[{&quot;key&quot;:&quot;level&quot;,&quot;value&quot;:&quot;\&quot;info\&quot;&quot;}]},{&quot;timestamp&quot;:&quot;2026-07-23T21:51:48.409841410Z&quot;,&quot;severity&quot;:&quot;error&quot;,&quot;message&quot;:&quot;INFO:     Started server process [2]&quot;,&quot;attributes&quot;:[{&quot;key&quot;:&quot;level&quot;,&quot;value&quot;:&quot;\&quot;error\&quot;&quot;}]},{&quot;timestamp&quot;:&quot;2026-07-23T21:51:48.409845660Z&quot;,&quot;severity&quot;:&quot;error&quot;,&quot;message&quot;:&quot;INFO:     Waiting for application startup.&quot;,&quot;attributes&quot;:[{&quot;key&quot;:&quot;level&quot;,&quot;value&quot;:&quot;\&quot;error\&quot;&quot;}]},{&quot;timestamp&quot;:&quot;2026-07-23T21:51:48.409849370Z&quot;,&quot;severity&quot;:&quot;error&quot;,&quot;message&quot;:&quot;INFO:     Application startup complete.&quot;,&quot;attributes&quot;:[{&quot;key&quot;:&quot;level&quot;,&quot;value&quot;:&quot;\&quot;error\&quot;&quot;}]},{&quot;timestamp&quot;:&quot;2026-07-23T21:51:48.409853380Z&quot;,&quot;severity&quot;:&quot;error&quot;,&quot;message&quot;:&quot;INFO:     Uvicorn running on http://0.0.0.0:8080 (Press CTRL+C to quit)&quot;,&quot;attributes&quot;:[{&quot;key&quot;:&quot;level&quot;,&quot;value&quot;:&quot;\&quot;error\&quot;&quot;}]}]}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-07-23T21-54-28-397Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-07-23T21-54-28-397Z" class="timestamp-link"><time datetime="2026-07-23T21:54:28.397Z" data-timestamp="2026-07-23T21:54:28.397Z">2026-07-23T21:54:28.397Z</time></a></div><div class="message-content">
+<div class="thinking"><div class="thinking-label">Thinking</div></div></div></div>
+<div class="message assistant" id="msg-2026-07-23T21-54-28-397Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-07-23T21-54-28-397Z" class="timestamp-link"><time datetime="2026-07-23T21:54:28.397Z" data-timestamp="2026-07-23T21:54:28.397Z">2026-07-23T21:54:28.397Z</time></a></div><div class="message-content">
+<div class="thinking"><div class="thinking-label">Thinking</div></div></div></div>
+<div class="message assistant" id="msg-2026-07-23T21-54-31-800Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-07-23T21-54-31-800Z" class="timestamp-link"><time datetime="2026-07-23T21:54:31.800Z" data-timestamp="2026-07-23T21:54:31.800Z">2026-07-23T21:54:31.800Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_017GwpEk2Ani7WtQPQDsx4zS"><div class="tool-header"><span class="tool-icon">⚙</span> mcp__claude_ai_railway__railway-agent</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;projectId&#34;: &#34;dd798dd3-36df-4a25-8794-08b181b54fe7&#34;,
+  &#34;environmentId&#34;: &#34;1df021b9-83e2-4b35-8bc6-f086ceecb527&#34;,
+  &#34;serviceId&#34;: &#34;90abf7f3-dd4b-47fd-82f3-21da540f548a&#34;,
+  &#34;threadId&#34;: &#34;ca3dc9d5-385d-4720-83b8-af19a3daa76d&#34;,
+  &#34;message&#34;: &#34;The app is running but on the wrong port: Railway injected PORT=8080 while the public domain targets port 8000, so requests get \&#34;Application failed to respond\&#34;. Please set the service environment variable PORT=8000 (so the app listens on the same port the domain targets), apply/commit the change, and redeploy. Confirm the final public URL when done.&#34;
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-07-23T21-54-39-917Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-07-23T21-54-39-917Z" class="timestamp-link"><time datetime="2026-07-23T21:54:39.917Z" data-timestamp="2026-07-23T21:54:39.917Z">2026-07-23T21:54:39.917Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>{&quot;threadId&quot;:&quot;ca3dc9d5-385d-4720-83b8-af19a3daa76d&quot;,&quot;response&quot;:&quot;Now I&#x27;ll trigger a new deployment to apply the PORT environment variable change.Done! The `PORT=8000` environment variable has been set and a new deployment is underway.\n\n**Deployment ID:** `a8eead66-a3f3-4576-ae7f-fed23a484b2b`\n**Public URL:** `https://fastreader.up.railway.app`\n\nThe app will now listen on port 8000, matching the public domain target. Once the deployment finishes, your app should be fully accessible.&quot;,&quot;toolCalls&quot;:[{&quot;toolName&quot;:&quot;updateServiceTool&quot;,&quot;args&quot;:{&quot;serviceId&quot;:&quot;90abf7f3-dd4b-47fd-82f3-21da540f548a&quot;,&quot;config&quot;:{&quot;variables&quot;:{&quot;PORT&quot;:{&quot;value&quot;:&quot;8000&quot;}}}},&quot;result&quot;:{&quot;status&quot;:&quot;applied&quot;,&quot;message&quot;:&quot;Service has been updated and changes are staged for deployment.&quot;},&quot;isError&quot;:false},{&quot;toolName&quot;:&quot;commitStagedChangesTool&quot;,&quot;args&quot;:{},&quot;result&quot;:{&quot;status&quot;:&quot;applied&quot;,&quot;message&quot;:&quot;Staged changes committed and deploying (workflow commitChanges/1df021b9-83e2-4b35-8bc6-f086ceecb527/a2336b99-79eb-4c66-9581-1fee3afe87ea). Use environment status to confirm services come up.&quot;},&quot;isError&quot;:false},{&quot;toolName&quot;:&quot;deployServiceTool&quot;,&quot;args&quot;:{&quot;serviceId&quot;:&quot;90abf7f3-dd4b-47fd-82f3-21da540f548a&quot;},&quot;result&quot;:{&quot;message&quot;:&quot;Deployment triggered for fastreader.&quot;,&quot;serviceId&quot;:&quot;90abf7f3-dd4b-47fd-82f3-21da540f548a&quot;,&quot;serviceName&quot;:&quot;fastreader&quot;,&quot;deploymentId&quot;:&quot;a8eead66-a3f3-4576-ae7f-fed23a484b2b&quot;,&quot;environmentId&quot;:&quot;1df021b9-83e2-4b35-8bc6-f086ceecb527&quot;},&quot;isError&quot;:false}]}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-07-23T21-54-45-587Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-07-23T21-54-45-587Z" class="timestamp-link"><time datetime="2026-07-23T21:54:45.587Z" data-timestamp="2026-07-23T21:54:45.587Z">2026-07-23T21:54:45.587Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01NiqaHFHhVvb5hBHiLxfP55">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Poll the real deployed domain until live</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">n=0; until [ $n -ge 40 ] || curl -s -m 5 -o /dev/null -w &#34;%{http_code}&#34; https://fastreader-production.up.railway.app/api/documents 2&gt;/dev/null | grep -q 200; do sleep 10; n=$((n+1)); done; echo &#34;api: $(curl -s -m 5 -o /dev/null -w &#39;%{http_code}&#39; https://fastreader-production.up.railway.app/api/documents)&#34;; echo &#34;root: $(curl -s -m 5 -o /dev/null -w &#39;%{http_code}&#39; https://fastreader-production.up.railway.app/)&#34;</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-07-23T21-54-45-676Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-07-23T21-54-45-676Z" class="timestamp-link"><time datetime="2026-07-23T21:54:45.676Z" data-timestamp="2026-07-23T21:54:45.676Z">2026-07-23T21:54:45.676Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>Command running in background with ID: b9s5ex0c6. Output is being written to: /private/tmp/claude-501/-Users-honglei-code-fastreader/d5b4f55f-1f3a-4d77-8177-80957b9ac53a/tasks/b9s5ex0c6.output. You will be notified when it completes. To check interim output, use Read on that file path.</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-07-23T21-54-55-410Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-07-23T21-54-55-410Z" class="timestamp-link"><time datetime="2026-07-23T21:54:55.410Z" data-timestamp="2026-07-23T21:54:55.410Z">2026-07-23T21:54:55.410Z</time></a></div><div class="message-content">
+<div class="thinking"><div class="thinking-label">Thinking</div></div></div></div>
+<div class="message assistant" id="msg-2026-07-23T21-54-55-412Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-07-23T21-54-55-412Z" class="timestamp-link"><time datetime="2026-07-23T21:54:55.412Z" data-timestamp="2026-07-23T21:54:55.412Z">2026-07-23T21:54:55.412Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>The fix (<code>PORT=8000</code>) is committed and redeploying now — deployment <code>a8eead66</code>. I have a poller watching the correct domain (<code>fastreader-production.up.railway.app</code>) this time; the moment <code>/api/documents</code> returns 200 I'll run the full walkthrough on the live site and confirm everything. (The earlier poller was aimed at a guessed URL — my mistake; the agent's reported <code>fastreader.up.railway.app</code> also wasn't the generated domain.)</p>
+<p>For the 30 seconds it takes: the deploy itself was already green — uvicorn booted cleanly with both documents baked into the image; only the edge-to-app port routing was mismatched.</p></div></div></div>
+<div class="message user" id="msg-2026-07-23T21-54-56-156Z"><div class="message-header"><span class="role-label">User</span><a href="#msg-2026-07-23T21-54-56-156Z" class="timestamp-link"><time datetime="2026-07-23T21:54:56.156Z" data-timestamp="2026-07-23T21:54:56.156Z">2026-07-23T21:54:56.156Z</time></a></div><div class="message-content">
+<div class="user-content"><p><task-notification>
+<task-id>b9s5ex0c6</task-id>
+<tool-use-id>toolu_01NiqaHFHhVvb5hBHiLxfP55</tool-use-id>
+<output-file>/private/tmp/claude-501/-Users-honglei-code-fastreader/d5b4f55f-1f3a-4d77-8177-80957b9ac53a/tasks/b9s5ex0c6.output</output-file>
+<status>completed</status></p>
+<summary>Background command "Poll the real deployed domain until live" completed (exit code 0)</summary>
+<p></task-notification></p></div></div></div>
+<div class="message assistant" id="msg-2026-07-23T21-55-02-273Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-07-23T21-55-02-273Z" class="timestamp-link"><time datetime="2026-07-23T21:55:02.273Z" data-timestamp="2026-07-23T21:55:02.273Z">2026-07-23T21:55:02.273Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01D7t4MRBhn5CbRU4gjtLBqt"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/private/tmp/claude-501/-Users-honglei-code-fastreader/d5b4f55f-1f3a-4d77-8177-80957b9ac53a/tasks/b9s5ex0c6.output&#34;
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-07-23T21-55-02-332Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-07-23T21-55-02-332Z" class="timestamp-link"><time datetime="2026-07-23T21:55:02.332Z" data-timestamp="2026-07-23T21:55:02.332Z">2026-07-23T21:55:02.332Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>1	api: 200
+2	root: 200
+3	</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-07-23T21-55-08-775Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-07-23T21-55-08-775Z" class="timestamp-link"><time datetime="2026-07-23T21:55:08.775Z" data-timestamp="2026-07-23T21:55:08.775Z">2026-07-23T21:55:08.775Z</time></a></div><div class="message-content">
+<div class="thinking"><div class="thinking-label">Thinking</div></div></div></div>
+<div class="message assistant" id="msg-2026-07-23T21-55-08-776Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-07-23T21-55-08-776Z" class="timestamp-link"><time datetime="2026-07-23T21:55:08.776Z" data-timestamp="2026-07-23T21:55:08.776Z">2026-07-23T21:55:08.776Z</time></a></div><div class="message-content">
+<div class="thinking"><div class="thinking-label">Thinking</div></div></div></div>
+<div class="message assistant" id="msg-2026-07-23T21-55-10-762Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-07-23T21-55-10-762Z" class="timestamp-link"><time datetime="2026-07-23T21:55:10.762Z" data-timestamp="2026-07-23T21:55:10.762Z">2026-07-23T21:55:10.762Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01KWJMxoqVfmjqA5fWK31kDu">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Open deployed app, screenshot library</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">orca tab create --url &#34;https://fastreader-production.up.railway.app/&#34; --json 2&gt;&amp;1 | grep -o &#39;&#34;ok&#34;: *[a-z]*&#39; &amp;&amp; sleep 3 &amp;&amp; orca screenshot --json 2&gt;/dev/null | python3 -c &#34;
+import json, sys, base64
+d = json.load(sys.stdin)
+open(&#39;/private/tmp/claude-501/-Users-honglei-code-fastreader/d5b4f55f-1f3a-4d77-8177-80957b9ac53a/scratchpad/prod_library.png&#39;,&#39;wb&#39;).write(base64.b64decode(d[&#39;result&#39;][&#39;data&#39;]))
+print(&#39;ok&#39;)&#34;</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-07-23T21-55-15-027Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-07-23T21-55-15-027Z" class="timestamp-link"><time datetime="2026-07-23T21:55:15.027Z" data-timestamp="2026-07-23T21:55:15.027Z">2026-07-23T21:55:15.027Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>&quot;ok&quot;: true
+ok</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-07-23T21-55-18-827Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-07-23T21-55-18-827Z" class="timestamp-link"><time datetime="2026-07-23T21:55:18.827Z" data-timestamp="2026-07-23T21:55:18.827Z">2026-07-23T21:55:18.827Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_016bvVpH2ktzKZpBJSC7V5kd"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/private/tmp/claude-501/-Users-honglei-code-fastreader/d5b4f55f-1f3a-4d77-8177-80957b9ac53a/scratchpad/prod_library.png&#34;
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-07-23T21-55-18-898Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-07-23T21-55-18-898Z" class="timestamp-link"><time datetime="2026-07-23T21:55:18.898Z" data-timestamp="2026-07-23T21:55:18.898Z">2026-07-23T21:55:18.898Z</time></a></div><div class="message-content"><div class="tool-result">
+<div class="image-block"><img src="data:image/png;base64,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9oCRRYUPnTq57m3zi3tvtNw9Wpb71C8fu2Vq9m0b/FyXCHZS0rD/7OtznBNKLddtWrZ63phkszuZ5M6d+6LzVxNDDvdJtl97XHyoD33xIlcrTJ3adbP4Fopk9jd04sRJr732hr5u+gr/+MP36Z0uqE4euwj6bOgQe4wmttytaVYWPHD//XYT1eTJk1euPPtTb+rG178rz5XDtm+/dTWohYeHp9kHlXHHjh1T/5LlPl/Ajkye6tWrb7nb8m6/407nY7V7otTiow8lyn26RK7cuZ1n2193neXeE6pUrdrAfRsVdfc562K5GxA9VwTANY3rsnDlqbVY//708y/2Q7vRVG2EHTp0HDv29wzOxK4o7Dr36zSqvDZr2tgeVoeA5a71vv/Bh870yhVJqe609u47g+uOrKcF6NGjp/5UI3n8scfSe8eyZcvldlu4aInn+O7du394rkcun/vXYLZt3Walb8aM6WoEVbvmQw8+rKr2HXfcqUhm3zjL7qVRXcF7yVOFIkeCuyp/mVStWtUecE5as84ltMgckZnaehd1KgNJYOzvvz355FMa6NK1qzb19m3b7N84VsBTxFJkat26jRKO3eN3dhWquFZBdUQn91rnoqnl/qmcNH+o98zp054PK1R0XaEeFxdnpaNEiZJ2P17//jc6Nz+w3Nsqsz9U9c3XX2luL738iqq2Tjepj085s4sKH0qVKmWXHrcMuLW/+1ogh3rI1XGRwfnUqVPHHrB/iMmTn8e9T+Lijng+lfGbB6pO7+feq71+43vturWNmzQp6T7jMYtvcdedd3z40cfaA9u0bas/7cmKcA899GCac1BLk73/fzviO3uMfZKqEoj6lj1/DjFT1FZy8sQJLYN9GxJbGXfjlNdPcZxx00GkWvXqVtZMmTJZf82bt3j66WdnzrjgmtsyZV3tdOrpSv2xqpnJuY/F7R63S3FUr17DPjocOHDA6ym1DGbl9xsBXD1IWbjCVMNQH85PP43xvMvfK6+8pgbCWwYMyHjKsvmown417It30z+/xabadreunZ9/4UX1HalaULRosZHffd+zR3dlttQT33f//eoT+N//nnLGtGvXvlWr1qqWla9Qwe5OsesWF+06GDXqx1tvva1e/fqqFvTo2euH789WTfz9XS9fv359n949rauAfRmVqvh1atdMc4KMbz0jlJT279+vCk2tWrXV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AAAAmETKAgAAAACTSFkAAAAAYBIpCwAAAABMImUBAAAAgEmkLAAAAAAwiZQFAAAAACaRsgAAAADAJFIWAAAAAJhEygIAAAAAk0hZAAAAAGASKQsAAAAATCJlAQAAAIBJpCwAAAAAMImUBQAAAAAmkbIAAAAAwCRSFgAAAACYRMoCAAAAAJNIWQAAAABgEikLAAAAAEwiZQEAAACASaQsAAAAADCJlAUAAAAAJpGyAAAAAMAkUhYAAAAAmETKAgAAAACTSFkAAAAAYBIpCwAAAABMImUBAAAAgEmkLAAAAAAwiZQFAAAAACaRsgAAAADAJFIWAAAAAJhEygIAAAAAk0hZAAAAAGASKQsAAAAATCJlAQAAAIBJpCwAAAAAMImUBQAAAAAmkbIAAAAAwCRSFgAAAACYRMoCAAAAAJNIWQAAAABgEikLAAAAAEwiZQEAAACASaQsAAAAADCJlAUAAAAAJpGyAAAAAMAkUhYAAAAAmETKAgAAAACTSFkAAAAAYBIpCwAAAABMImUBAAAAgEmkLAAAAAAwiZQFAAAAACaRsgAAAADAJFIWAAAAAJhEygIAAAAAk0hZAAAAAGASKQsAAAAATCJlAQAAAIBJpCwAAAAAMImUBQAAAAAmkbIAAAAAwCRSFgAAAACYRMoCAAAAAJNIWQAAAABgEikLAAAAAEwiZQEAAACASaQsAAAAADCJlAUAAAAAJpGyAAAAAMAkUhYAAAAAmETKAgAAAACTSFkAAAAAYBIpCwAAAABMImUBAAAAgEmkLAAAAAAwiZQFAAAAACaRsgAAAADAJFIWAAAAAJhEygIAAAAAk0hZAAAAAGASKQsAAAAATCJlAQAAAIBJpCwAAAAAMImUBQAAAAAmkbIAAAAAwCRSFgAAAACYRMoCAAAAAJNIWQAAAABgEikLAAAAAEwiZQEAAACASaQsAAAAADCJlAUAAAAAJpGyAAAAAMAkUhYAAAAAmETKAgAAAACTSFkAAAAAYBIpCwAAAABMImUBAAAAgEmkLAAAAAAwiZQFAAAAACaRsgAAAADAJFIWAAAAAJhEygIAAAAAk0hZAAAAAGASKQsAAAAATCJlAQAAAIBJpCwAAAAAMImUBQAAAAAmkbIAAAAAwCRSFgAAAACYRMoCAAAAAJNIWQAAAABgEikLAAAAAEwiZQEAAACASaQsAAAAADCJlAUAAAAAJpGyAAAAAMAkUhYAAAAAmETKAgAAAACTSFkAAAAAYBIpCwAAAABMImUBAAAAgEmkLAAAAAAwiZQFAAAAACaRsgAAAADAJFIWAAAAAJhEygIAAAAAk0hZAAAAAGASKQsAAAAATCJlAQAAAIBJpCwAAAAAMImUBQAAAAAmkbIAAAAAwCRSFgAAAACYRMoCAAAAAJNIWQAAAABgEikLAAAAAEwiZQEAAACASaQsAAAAADCJlAUAAAAAJpGyAAAAAMAkUhYAAAAAmETKAgAAAACTSFkAAAAAYBIpCwAAAABMImUBAAAAgEmkLAAAAAAwiZQFAAAAACaRsgAAAADAJFIWAAAAAJhEygIAAAAAk0hZAAAAAGASKQsAAAAATCJlAQAAAIBJpCwAAAAAMImUBQAAAAAmkbIAAAAAwCRSFgAAAACYRMoCAAAAAJNIWQAAAABgEikLAAAAAEwiZQEAAACASaQsAAAAADCJlAUAAAAAJpGyAAAAAMAkUhYAAAAAmETKAgAAAACTSFkAAAAAYBIpCwAAAABMImUBAAAAgEmkLAAAAAAwiZQFAAAAACaRsgAAAADAJFIWAAAAAJhEygIAAAAAk0hZAAAAAGASKQsAAAAATCJlAQAAAIBJpCwAAAAAMImUBQAAAAAmkbIAAAAAwCRSFgAAAACYRMoCAAAAAJNIWQAAAABgEikLAAAAAEwiZQEAAACASaQsAAAAADCJlAUAAAAAJpGyAAAAAMAkUhYAAAAAmETKAgAAAACTSFkAAAAAYBIpCwAAAABMImUBAAAAgEmkLAAAAAAwiZQFAAAAACaRsgAAAADAJFIWAAAAAJhEygIAAAAAk0hZwP+zX8cCAAAAAIP8rSexsywCAICTZQEAAJwsCwAA4GRZAAAAJ8sCAAA4WRYAAMDJsgAAAE6WBQAAcLIsAACAk2UBAACcLAsAAOBkWQAAACfLAgAAOFkWAADAybIAAABOlgUAAHCyLAAAgJNlAQAAnCwLAADgZFkAAAAnywIAADhZFgAAwMmyAAAATpYFAABwsiwAAICTZQEAAJwsCwAA4GRZAAAAJ8sCAAA4WRYAAMDJsgAAAE6WBQAAcLIsAACAk2UBAACcLAsAAOBkWQAAACfLAgAAOFkWAADAybIAAABOlgUAAHCyLAAAgJNlAQAAnCwLAADgZFkAAAAnywIAADhZFgAAwMmyAAAATpYFAABwsiwAAICTZQEAAJwsCwAA4GRZAAAAJ8sCAAA4WRYAAMDJsgAAAE6WBQAAcLIsAACAk2UBAACcLAsAAOBkWQAAACfLAgAAOFkWAADAybIAAABOlgUAAHCyLAAAgJNlAQAAnCwLAADgZFkAAAAnywIAADhZFgAAwMmyAAAATpYFAABwsiwAAICTZQEAAJwsCwAA4GRZAAAAJ8sCAAA4WRYAAMDJsgAAAE6WBQAAcLIsAACAk2UBAACcLAsAAOBkWQAAACfLAgAAOFkWAADAybIAAABOlgUAAHCyLAAAgJNlAQAAnCwLAADgZFkAAACnAAAA//8PihReAAAABklEQVQDAPpvnILCcDaqAAAAAElFTkSuQmCC" style="max-width: 100%"></div></div></div></div>
+<div class="message assistant" id="msg-2026-07-23T21-55-23-561Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-07-23T21-55-23-561Z" class="timestamp-link"><time datetime="2026-07-23T21:55:23.561Z" data-timestamp="2026-07-23T21:55:23.561Z">2026-07-23T21:55:23.561Z</time></a></div><div class="message-content">
+<div class="thinking"><div class="thinking-label">Thinking</div></div></div></div>
+<div class="message assistant" id="msg-2026-07-23T21-55-23-564Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-07-23T21-55-23-564Z" class="timestamp-link"><time datetime="2026-07-23T21:55:23.564Z" data-timestamp="2026-07-23T21:55:23.564Z">2026-07-23T21:55:23.564Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Both cards live on production. Walking through Alice on the deployed site:</p></div></div></div>
+<div class="message assistant" id="msg-2026-07-23T21-55-24-899Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-07-23T21-55-24-899Z" class="timestamp-link"><time datetime="2026-07-23T21:55:24.899Z" data-timestamp="2026-07-23T21:55:24.899Z">2026-07-23T21:55:24.899Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01L8HYqkc1DNKDmczARZDYcH">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Open Alice on production</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">orca eval --expression &#34;new Promise(r =&gt; { document.querySelectorAll(&#39;button&#39;)[0].click(); setTimeout(() =&gt; r(document.querySelector(&#39;header&#39;)?.textContent || &#39;no header&#39;), 800); })&#34; --json 2&gt;&amp;1 | grep &#39;&#34;result&#34;&#39; -A1 | head -2</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-07-23T21-55-25-980Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-07-23T21-55-25-980Z" class="timestamp-link"><time datetime="2026-07-23T21:55:25.980Z" data-timestamp="2026-07-23T21:55:25.980Z">2026-07-23T21:55:25.980Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>  &quot;result&quot;: {
+    &quot;result&quot;: &quot;←Alice&#x27;s Adventures in WonderlandIn one breath · 25 sec&quot;,</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-07-23T21-55-34-425Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-07-23T21-55-34-425Z" class="timestamp-link"><time datetime="2026-07-23T21:55:34.425Z" data-timestamp="2026-07-23T21:55:34.425Z">2026-07-23T21:55:34.425Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01BKWQHVBfLpGrBnuSyrwWca">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Full zoom walkthrough on production Alice</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">orca eval --expression &#34;
+(async () =&gt; {
+  const sc = document.querySelector(&#39;.reader-scroll&#39;);
+  const fire = (opts) =&gt; sc.dispatchEvent(new WheelEvent(&#39;wheel&#39;, Object.assign({bubbles:true,cancelable:true,clientX:500}, opts)));
+  const wait = (ms) =&gt; new Promise(r =&gt; setTimeout(r, ms));
+  const states = [];
+  const rec = () =&gt; states.push(document.querySelector(&#39;header&#39;).textContent.split(&#39;Wonderland&#39;)[1] + &#39; @&#39; + document.querySelector(&#39;.reader-scroll&#39;).scrollTop);
+  fire({ctrlKey:true, deltaY:-100, clientY:200}); await wait(450); rec();   // pinch in (top anchor)
+  fire({metaKey:true, deltaY:-100, clientY:600}); await wait(450); rec();   // cmd in (bottom anchor)
+  fire({shiftKey:true, deltaY:0, deltaX:-100, clientY:400}); await wait(450); rec(); // shift in (deltaX)
+  fire({altKey:true, deltaY:-100, clientY:400}); await wait(450); rec();    // alt in -&gt; full text
+  sc.dispatchEvent(new MouseEvent(&#39;dblclick&#39;, {shiftKey:true, clientY:400, clientX:500, bubbles:true, cancelable:true})); await wait(450); rec(); // shift+dblclick out
+  window.dispatchEvent(new KeyboardEvent(&#39;keydown&#39;, {key:&#39;+&#39;})); await wait(450); rec(); // + key back in
+  return states.join(&#39; | &#39;);
+})()&#34; --json 2&gt;&amp;1 | grep &#39;&#34;result&#34;&#39; -A1 | head -3</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-07-23T21-55-37-396Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-07-23T21-55-37-396Z" class="timestamp-link"><time datetime="2026-07-23T21:55:37.396Z" data-timestamp="2026-07-23T21:55:37.396Z">2026-07-23T21:55:37.396Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>  &quot;result&quot;: {
+    &quot;result&quot;: &quot;The arc · ~2 min @418 | Twelve chapters · ~7 min @2512 | Scene by scene · ~30 min @9186 | Every word · ~1.9 hrs @50535 | Scene by scene · ~30 min @9186 | Every word · ~1.9 hrs @50565&quot;,
+    &quot;origin&quot;: &quot;https://fastreader-production.up.railway.app/&quot;</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-07-23T21-55-47-764Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-07-23T21-55-47-764Z" class="timestamp-link"><time datetime="2026-07-23T21:55:47.764Z" data-timestamp="2026-07-23T21:55:47.764Z">2026-07-23T21:55:47.764Z</time></a></div><div class="message-content">
+<div class="thinking"><div class="thinking-label">Thinking</div></div></div></div>
+<div class="message assistant" id="msg-2026-07-23T21-55-47-786Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-07-23T21-55-47-786Z" class="timestamp-link"><time datetime="2026-07-23T21:55:47.786Z" data-timestamp="2026-07-23T21:55:47.786Z">2026-07-23T21:55:47.786Z</time></a></div><div class="message-content">
+<div class="thinking"><div class="thinking-label">Thinking</div></div></div></div>
+<div class="message assistant" id="msg-2026-07-23T21-55-50-375Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-07-23T21-55-50-375Z" class="timestamp-link"><time datetime="2026-07-23T21:55:50.375Z" data-timestamp="2026-07-23T21:55:50.375Z">2026-07-23T21:55:50.375Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01RJRw1KKsn7NRDLG8QxG9ed">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Screenshot full text, then open paper on production</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">orca screenshot --json 2&gt;/dev/null | python3 -c &#34;
+import json, sys, base64
+d = json.load(sys.stdin)
+open(&#39;/private/tmp/claude-501/-Users-honglei-code-fastreader/d5b4f55f-1f3a-4d77-8177-80957b9ac53a/scratchpad/prod_fulltext.png&#39;,&#39;wb&#39;).write(base64.b64decode(d[&#39;result&#39;][&#39;data&#39;]))
+print(&#39;ok&#39;)&#34; &amp;&amp; orca eval --expression &#34;new Promise(r =&gt; { location.href=&#39;/&#39;; setTimeout(() =&gt; { document.querySelectorAll(&#39;button&#39;)[1].click(); setTimeout(() =&gt; r(document.querySelector(&#39;header&#39;).textContent), 900); }, 1200); })&#34; --json 2&gt;&amp;1 | grep &#39;&#34;result&#34;&#39; -A1 | head -2</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-07-23T21-55-51-902Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-07-23T21-55-51-902Z" class="timestamp-link"><time datetime="2026-07-23T21:55:51.902Z" data-timestamp="2026-07-23T21:55:51.902Z">2026-07-23T21:55:51.902Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>ok</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-07-23T21-55-55-750Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-07-23T21-55-55-750Z" class="timestamp-link"><time datetime="2026-07-23T21:55:55.750Z" data-timestamp="2026-07-23T21:55:55.750Z">2026-07-23T21:55:55.750Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01BHb1kLwNcMo6WjoW62uZUa">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Check paper opened after navigation</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">sleep 3; orca eval --expression &#34;document.querySelector(&#39;header&#39;)?.textContent || document.title&#34; --json 2&gt;&amp;1 | grep &#39;&#34;result&#34;&#39; -A1 | head -2</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-07-23T21-55-59-019Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-07-23T21-55-59-019Z" class="timestamp-link"><time datetime="2026-07-23T21:55:59.019Z" data-timestamp="2026-07-23T21:55:59.019Z">2026-07-23T21:55:59.019Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>  &quot;result&quot;: {
+    &quot;result&quot;: &quot;frontend&quot;,</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-07-23T21-56-04-798Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-07-23T21-56-04-798Z" class="timestamp-link"><time datetime="2026-07-23T21:56:04.798Z" data-timestamp="2026-07-23T21:56:04.798Z">2026-07-23T21:56:04.798Z</time></a></div><div class="message-content">
+<div class="thinking"><div class="thinking-label">Thinking</div></div></div></div>
+<div class="message assistant" id="msg-2026-07-23T21-56-07-098Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-07-23T21-56-07-098Z" class="timestamp-link"><time datetime="2026-07-23T21:56:07.098Z" data-timestamp="2026-07-23T21:56:07.098Z">2026-07-23T21:56:07.098Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01WxpVRauCjhg16xjSRGn1rg">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Open paper on production and zoom in once</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">orca eval --expression &#34;new Promise(r =&gt; { const b = Array.from(document.querySelectorAll(&#39;button&#39;)).find(x =&gt; x.textContent.includes(&#39;Attention&#39;)); b.click(); setTimeout(() =&gt; { const sc = document.querySelector(&#39;.reader-scroll&#39;); sc.dispatchEvent(new WheelEvent(&#39;wheel&#39;, {ctrlKey:true, deltaY:-100, clientY:300, clientX:500, bubbles:true, cancelable:true})); setTimeout(() =&gt; r(document.querySelector(&#39;header&#39;).textContent), 500); }, 800); })&#34; --json 2&gt;&amp;1 | grep &#39;&#34;result&#34;&#39; -A1 | head -2</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-07-23T21-56-08-644Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-07-23T21-56-08-644Z" class="timestamp-link"><time datetime="2026-07-23T21:56:08.644Z" data-timestamp="2026-07-23T21:56:08.644Z">2026-07-23T21:56:08.644Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>  &quot;result&quot;: {
+    &quot;result&quot;: &quot;←Attention Is All You NeedThe idea · ~2 min&quot;,</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-07-23T21-56-14-160Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-07-23T21-56-14-160Z" class="timestamp-link"><time datetime="2026-07-23T21:56:14.160Z" data-timestamp="2026-07-23T21:56:14.160Z">2026-07-23T21:56:14.160Z</time></a></div><div class="message-content">
+<div class="thinking"><div class="thinking-label">Thinking</div></div></div></div>
+<div class="message assistant" id="msg-2026-07-23T21-56-14-162Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-07-23T21-56-14-162Z" class="timestamp-link"><time datetime="2026-07-23T21:56:14.162Z" data-timestamp="2026-07-23T21:56:14.162Z">2026-07-23T21:56:14.162Z</time></a></div><div class="message-content">
+<div class="thinking"><div class="thinking-label">Thinking</div></div></div></div>
+<div class="message assistant" id="msg-2026-07-23T21-56-14-555Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-07-23T21-56-14-555Z" class="timestamp-link"><time datetime="2026-07-23T21:56:14.555Z" data-timestamp="2026-07-23T21:56:14.555Z">2026-07-23T21:56:14.555Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01PtEVJV5qkXpPhF88ao5CPw"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/Users/honglei/code/fastreader/frontend/index.html&#34;
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-07-23T21-56-14-616Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-07-23T21-56-14-616Z" class="timestamp-link"><time datetime="2026-07-23T21:56:14.616Z" data-timestamp="2026-07-23T21:56:14.616Z">2026-07-23T21:56:14.616Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>1	&lt;!doctype html&gt;
+2	&lt;html lang=&quot;en&quot;&gt;
+3	  &lt;head&gt;
+4	    &lt;meta charset=&quot;UTF-8&quot; /&gt;
+5	    &lt;link rel=&quot;icon&quot; type=&quot;image/svg+xml&quot; href=&quot;/favicon.svg&quot; /&gt;
+6	    &lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1.0&quot; /&gt;
+7	    &lt;title&gt;frontend&lt;/title&gt;
+8	  &lt;/head&gt;
+9	  &lt;body&gt;
+10	    &lt;div id=&quot;root&quot;&gt;&lt;/div&gt;
+11	    &lt;script type=&quot;module&quot; src=&quot;/src/main.tsx&quot;&gt;&lt;/script&gt;
+12	  &lt;/body&gt;
+13	&lt;/html&gt;
+14	</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-07-23T21-56-19-998Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-07-23T21-56-19-998Z" class="timestamp-link"><time datetime="2026-07-23T21:56:19.998Z" data-timestamp="2026-07-23T21:56:19.998Z">2026-07-23T21:56:19.998Z</time></a></div><div class="message-content"><div class="file-tool edit-tool" data-tool-id="toolu_01UdfqWrajHcK6QjNYCxiXmR">
+<div class="file-tool-header edit-header"><span class="file-tool-icon">✏️</span> Edit <span class="file-tool-path">index.html</span></div>
+<div class="file-tool-fullpath">/Users/honglei/code/fastreader/frontend/index.html</div>
+<div class="truncatable"><div class="truncatable-content">
+<div class="edit-section edit-old"><div class="edit-label">−</div><pre class="edit-content">    &lt;link rel=&#34;icon&#34; type=&#34;image/svg+xml&#34; href=&#34;/favicon.svg&#34; /&gt;
+    &lt;meta name=&#34;viewport&#34; content=&#34;width=device-width, initial-scale=1.0&#34; /&gt;
+    &lt;title&gt;frontend&lt;/title&gt;</pre></div>
+<div class="edit-section edit-new"><div class="edit-label">+</div><pre class="edit-content">    &lt;link rel=&#34;icon&#34; href=&#34;data:image/svg+xml,&lt;svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22&gt;&lt;text y=%22.9em%22 font-size=%2290%22&gt;🗺️&lt;/text&gt;&lt;/svg&gt;&#34; /&gt;
+    &lt;meta name=&#34;viewport&#34; content=&#34;width=device-width, initial-scale=1.0&#34; /&gt;
+    &lt;title&gt;FastReader&lt;/title&gt;</pre></div>
+</div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-07-23T21-56-20-084Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-07-23T21-56-20-084Z" class="timestamp-link"><time datetime="2026-07-23T21:56:20.084Z" data-timestamp="2026-07-23T21:56:20.084Z">2026-07-23T21:56:20.084Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /Users/honglei/code/fastreader/frontend/index.html has been updated successfully. (file state is current in your context — no need to Read it back)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-07-23T21-56-32-209Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-07-23T21-56-32-209Z" class="timestamp-link"><time datetime="2026-07-23T21:56:32.209Z" data-timestamp="2026-07-23T21:56:32.209Z">2026-07-23T21:56:32.209Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01CPGpKSyucwLmRgKzAHPtLh">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Commit title fix, push, run full test suite</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">git add frontend/index.html &amp;&amp; git commit -q -m &#34;fix: page title and favicon
+
+Co-Authored-By: Claude Fable 5 &lt;noreply@anthropic.com&gt;&#34; &amp;&amp; git push 2&gt;&amp;1 | tail -1 &amp;&amp; backend/.venv/bin/pytest backend/tests -q 2&gt;&amp;1 | tail -1 &amp;&amp; cd frontend &amp;&amp; npm test 2&gt;&amp;1 | grep &#34;Tests&#34; &amp;&amp; npm run build 2&gt;&amp;1 | tail -1</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-07-23T21-56-35-457Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-07-23T21-56-35-457Z" class="timestamp-link"><time datetime="2026-07-23T21:56:35.457Z" data-timestamp="2026-07-23T21:56:35.457Z">2026-07-23T21:56:35.457Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>   9c13781..a0a9d83  fastreader-phase1 -&gt; fastreader-phase1
+13 passed, 1 warning in 0.18s
+      Tests  6 passed (6)
+✓ built in 95ms</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-07-23T21-56-39-266Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-07-23T21-56-39-266Z" class="timestamp-link"><time datetime="2026-07-23T21:56:39.266Z" data-timestamp="2026-07-23T21:56:39.266Z">2026-07-23T21:56:39.266Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01MwwgXjbxK6cUGpe7ED3ipo"><div class="tool-header"><span class="tool-icon">⚙</span> TaskUpdate</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;taskId&#34;: &#34;12&#34;,
+  &#34;status&#34;: &#34;completed&#34;
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-07-23T21-56-39-323Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-07-23T21-56-39-323Z" class="timestamp-link"><time datetime="2026-07-23T21:56:39.323Z" data-timestamp="2026-07-23T21:56:39.323Z">2026-07-23T21:56:39.323Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>Updated task #12 status</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-07-23T21-56-44-758Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-07-23T21-56-44-758Z" class="timestamp-link"><time datetime="2026-07-23T21:56:44.758Z" data-timestamp="2026-07-23T21:56:44.758Z">2026-07-23T21:56:44.758Z</time></a></div><div class="message-content">
+<div class="thinking"><div class="thinking-label">Thinking</div></div></div></div>
+<div class="message assistant" id="msg-2026-07-23T21-56-44-761Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-07-23T21-56-44-761Z" class="timestamp-link"><time datetime="2026-07-23T21:56:44.761Z" data-timestamp="2026-07-23T21:56:44.761Z">2026-07-23T21:56:44.761Z</time></a></div><div class="message-content">
+<div class="thinking"><div class="thinking-label">Thinking</div></div></div></div>
+<div class="message assistant" id="msg-2026-07-23T21-56-45-580Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-07-23T21-56-45-580Z" class="timestamp-link"><time datetime="2026-07-23T21:56:45.580Z" data-timestamp="2026-07-23T21:56:45.580Z">2026-07-23T21:56:45.580Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01MeW63AMsiJqx4xi5V6KfhL"><div class="tool-header"><span class="tool-icon">⚙</span> Skill</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;skill&#34;: &#34;superpowers:finishing-a-development-branch&#34;,
+  &#34;args&#34;: &#34;FastReader phase 1 complete on branch fastreader-phase1; all tests pass; deployed to Railway from this branch&#34;
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-07-23T21-56-45-640Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-07-23T21-56-45-640Z" class="timestamp-link"><time datetime="2026-07-23T21:56:45.640Z" data-timestamp="2026-07-23T21:56:45.640Z">2026-07-23T21:56:45.640Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>Launching skill: superpowers:finishing-a-development-branch</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message user" id="msg-2026-07-23T21-56-45-618Z"><div class="message-header"><span class="role-label">User</span><a href="#msg-2026-07-23T21-56-45-618Z" class="timestamp-link"><time datetime="2026-07-23T21:56:45.618Z" data-timestamp="2026-07-23T21:56:45.618Z">2026-07-23T21:56:45.618Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Base directory for this skill: /Users/honglei/.claude/plugins/cache/claude-plugins-official/superpowers/6.1.1/skills/finishing-a-development-branch</p>
+<h1>Finishing a Development Branch</h1>
+<h2>Overview</h2>
+<p>Guide completion of development work by presenting clear options and handling chosen workflow.</p>
+<p><strong>Core principle:</strong> Verify tests → Detect environment → Present options → Execute choice → Clean up.</p>
+<p><strong>Announce at start:</strong> "I'm using the finishing-a-development-branch skill to complete this work."</p>
+<h2>The Process</h2>
+<h3>Step 1: Verify Tests</h3>
+<p><strong>Before presenting options, verify tests pass:</strong></p>
+<pre><code class="language-bash"># Run project's test suite
+npm test / cargo test / pytest / go test ./...
+</code></pre>
+<p><strong>If tests fail:</strong></p>
+<pre><code>Tests failing (&lt;N&gt; failures). Must fix before completing:
+
+[Show failures]
+
+Cannot proceed with merge/PR until tests pass.
+</code></pre>
+<p>Stop. Don't proceed to Step 2.</p>
+<p><strong>If tests pass:</strong> Continue to Step 2.</p>
+<h3>Step 2: Detect Environment</h3>
+<p><strong>Determine workspace state before presenting options:</strong></p>
+<pre><code class="language-bash">GIT_DIR=$(cd &quot;$(git rev-parse --git-dir)&quot; 2&gt;/dev/null &amp;&amp; pwd -P)
+GIT_COMMON=$(cd &quot;$(git rev-parse --git-common-dir)&quot; 2&gt;/dev/null &amp;&amp; pwd -P)
+</code></pre>
+<p>This determines which menu to show and how cleanup works:</p>
+<table>
+<thead>
+<tr>
+<th>State</th>
+<th>Menu</th>
+<th>Cleanup</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>GIT_DIR == GIT_COMMON</code> (normal repo)</td>
+<td>Standard 4 options</td>
+<td>No worktree to clean up</td>
+</tr>
+<tr>
+<td><code>GIT_DIR != GIT_COMMON</code>, named branch</td>
+<td>Standard 4 options</td>
+<td>Provenance-based (see Step 6)</td>
+</tr>
+<tr>
+<td><code>GIT_DIR != GIT_COMMON</code>, detached HEAD</td>
+<td>Reduced 3 options (no merge)</td>
+<td>No cleanup (externally managed)</td>
+</tr>
+</tbody>
+</table>
+<h3>Step 3: Determine Base Branch</h3>
+<pre><code class="language-bash"># Try common base branches
+git merge-base HEAD main 2&gt;/dev/null || git merge-base HEAD master 2&gt;/dev/null
+</code></pre>
+<p>Or ask: "This branch split from main - is that correct?"</p>
+<h3>Step 4: Present Options</h3>
+<p><strong>Normal repo and named-branch worktree — present exactly these 4 options:</strong></p>
+<pre><code>Implementation complete. What would you like to do?
+
+1. Merge back to &lt;base-branch&gt; locally
+2. Push and create a Pull Request
+3. Keep the branch as-is (I'll handle it later)
+4. Discard this work
+
+Which option?
+</code></pre>
+<p><strong>Detached HEAD — present exactly these 3 options:</strong></p>
+<pre><code>Implementation complete. You're on a detached HEAD (externally managed workspace).
+
+1. Push as new branch and create a Pull Request
+2. Keep as-is (I'll handle it later)
+3. Discard this work
+
+Which option?
+</code></pre>
+<p><strong>Don't add explanation</strong> - keep options concise.</p>
+<h3>Step 5: Execute Choice</h3>
+<h4>Option 1: Merge Locally</h4>
+<pre><code class="language-bash"># Get main repo root for CWD safety
+MAIN_ROOT=$(git -C &quot;$(git rev-parse --git-common-dir)/..&quot; rev-parse --show-toplevel)
+cd &quot;$MAIN_ROOT&quot;
+
+# Merge first — verify success before removing anything
+git checkout &lt;base-branch&gt;
+git pull
+git merge &lt;feature-branch&gt;
+
+# Verify tests on merged result
+&lt;test command&gt;
+
+# Only after merge succeeds: cleanup worktree (Step 6), then delete branch
+</code></pre>
+<p>Then: Cleanup worktree (Step 6), then delete branch:</p>
+<pre><code class="language-bash">git branch -d &lt;feature-branch&gt;
+</code></pre>
+<h4>Option 2: Push and Create PR</h4>
+<pre><code class="language-bash"># Push branch
+git push -u origin &lt;feature-branch&gt;
+</code></pre>
+<p><strong>Do NOT clean up worktree</strong> — user needs it alive to iterate on PR feedback.</p>
+<h4>Option 3: Keep As-Is</h4>
+<p>Report: "Keeping branch <name>. Worktree preserved at <path>."</p>
+<p><strong>Don't cleanup worktree.</strong></p>
+<h4>Option 4: Discard</h4>
+<p><strong>Confirm first:</strong></p>
+<pre><code>This will permanently delete:
+- Branch &lt;name&gt;
+- All commits: &lt;commit-list&gt;
+- Worktree at &lt;path&gt;
+
+Type 'discard' to confirm.
+</code></pre>
+<p>Wait for exact confirmation.</p>
+<p>If confirmed:</p>
+<pre><code class="language-bash">MAIN_ROOT=$(git -C &quot;$(git rev-parse --git-common-dir)/..&quot; rev-parse --show-toplevel)
+cd &quot;$MAIN_ROOT&quot;
+</code></pre>
+<p>Then: Cleanup worktree (Step 6), then force-delete branch:</p>
+<pre><code class="language-bash">git branch -D &lt;feature-branch&gt;
+</code></pre>
+<h3>Step 6: Cleanup Workspace</h3>
+<p><strong>Only runs for Options 1 and 4.</strong> Options 2 and 3 always preserve the worktree.</p>
+<pre><code class="language-bash">GIT_DIR=$(cd &quot;$(git rev-parse --git-dir)&quot; 2&gt;/dev/null &amp;&amp; pwd -P)
+GIT_COMMON=$(cd &quot;$(git rev-parse --git-common-dir)&quot; 2&gt;/dev/null &amp;&amp; pwd -P)
+WORKTREE_PATH=$(git rev-parse --show-toplevel)
+</code></pre>
+<p><strong>If <code>GIT_DIR == GIT_COMMON</code>:</strong> Normal repo, no worktree to clean up. Done.</p>
+<p><strong>If worktree path is under <code>.worktrees/</code> or <code>worktrees/</code>:</strong> Superpowers created this worktree — we own cleanup.</p>
+<pre><code class="language-bash">MAIN_ROOT=$(git -C &quot;$(git rev-parse --git-common-dir)/..&quot; rev-parse --show-toplevel)
+cd &quot;$MAIN_ROOT&quot;
+git worktree remove &quot;$WORKTREE_PATH&quot;
+git worktree prune  # Self-healing: clean up any stale registrations
+</code></pre>
+<p><strong>Otherwise:</strong> The host environment (harness) owns this workspace. Do NOT remove it. If your platform provides a workspace-exit tool, use it. Otherwise, leave the workspace in place.</p>
+<h2>Quick Reference</h2>
+<table>
+<thead>
+<tr>
+<th>Option</th>
+<th>Merge</th>
+<th>Push</th>
+<th>Keep Worktree</th>
+<th>Cleanup Branch</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1. Merge locally</td>
+<td>yes</td>
+<td>-</td>
+<td>-</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>2. Create PR</td>
+<td>-</td>
+<td>yes</td>
+<td>yes</td>
+<td>-</td>
+</tr>
+<tr>
+<td>3. Keep as-is</td>
+<td>-</td>
+<td>-</td>
+<td>yes</td>
+<td>-</td>
+</tr>
+<tr>
+<td>4. Discard</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>yes (force)</td>
+</tr>
+</tbody>
+</table>
+<h2>Common Mistakes</h2>
+<p><strong>Skipping test verification</strong>
+- <strong>Problem:</strong> Merge broken code, create failing PR
+- <strong>Fix:</strong> Always verify tests before offering options</p>
+<p><strong>Open-ended questions</strong>
+- <strong>Problem:</strong> "What should I do next?" is ambiguous
+- <strong>Fix:</strong> Present exactly 4 structured options (or 3 for detached HEAD)</p>
+<p><strong>Cleaning up worktree for Option 2</strong>
+- <strong>Problem:</strong> Remove worktree user needs for PR iteration
+- <strong>Fix:</strong> Only cleanup for Options 1 and 4</p>
+<p><strong>Deleting branch before removing worktree</strong>
+- <strong>Problem:</strong> <code>git branch -d</code> fails because worktree still references the branch
+- <strong>Fix:</strong> Merge first, remove worktree, then delete branch</p>
+<p><strong>Running git worktree remove from inside the worktree</strong>
+- <strong>Problem:</strong> Command fails silently when CWD is inside the worktree being removed
+- <strong>Fix:</strong> Always <code>cd</code> to main repo root before <code>git worktree remove</code></p>
+<p><strong>Cleaning up harness-owned worktrees</strong>
+- <strong>Problem:</strong> Removing a worktree the harness created causes phantom state
+- <strong>Fix:</strong> Only clean up worktrees under <code>.worktrees/</code> or <code>worktrees/</code></p>
+<p><strong>No confirmation for discard</strong>
+- <strong>Problem:</strong> Accidentally delete work
+- <strong>Fix:</strong> Require typed "discard" confirmation</p>
+<h2>Red Flags</h2>
+<p><strong>Never:</strong>
+- Proceed with failing tests
+- Merge without verifying tests on result
+- Delete work without confirmation
+- Force-push without explicit request
+- Remove a worktree before confirming merge success
+- Clean up worktrees you didn't create (provenance check)
+- Run <code>git worktree remove</code> from inside the worktree</p>
+<p><strong>Always:</strong>
+- Verify tests before offering options
+- Detect environment before presenting menu
+- Present exactly 4 options (or 3 for detached HEAD)
+- Get typed confirmation for Option 4
+- Clean up worktree for Options 1 &amp; 4 only
+- <code>cd</code> to main repo root before worktree removal
+- Run <code>git worktree prune</code> after removal</p>
+<p>ARGUMENTS: FastReader phase 1 complete on branch fastreader-phase1; all tests pass; deployed to Railway from this branch</p></div></div></div>
+<div class="message assistant" id="msg-2026-07-23T21-56-52-348Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-07-23T21-56-52-348Z" class="timestamp-link"><time datetime="2026-07-23T21:56:52.348Z" data-timestamp="2026-07-23T21:56:52.348Z">2026-07-23T21:56:52.348Z</time></a></div><div class="message-content">
+<div class="thinking"><div class="thinking-label">Thinking</div></div></div></div>
+<div class="message assistant" id="msg-2026-07-23T21-56-52-351Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-07-23T21-56-52-351Z" class="timestamp-link"><time datetime="2026-07-23T21:56:52.351Z" data-timestamp="2026-07-23T21:56:52.351Z">2026-07-23T21:56:52.351Z</time></a></div><div class="message-content">
+<div class="thinking"><div class="thinking-label">Thinking</div></div></div></div>
+<div class="message assistant" id="msg-2026-07-23T21-56-55-379Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-07-23T21-56-55-379Z" class="timestamp-link"><time datetime="2026-07-23T21:56:55.379Z" data-timestamp="2026-07-23T21:56:55.379Z">2026-07-23T21:56:55.379Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01XxrGk71TmBhyRjyYApAZee"><div class="tool-header"><span class="tool-icon">⚙</span> AskUserQuestion</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;questions&#34;: [
+    {
+      &#34;question&#34;: &#34;FastReader phase 1 is complete, tested, and live. What should happen to branch fastreader-phase1?&#34;,
+      &#34;header&#34;: &#34;Finish&#34;,
+      &#34;multiSelect&#34;: false,
+      &#34;options&#34;: [
+        {
+          &#34;label&#34;: &#34;Merge to main locally (Recommended)&#34;,
+          &#34;description&#34;: &#34;Merge, re-run tests on main, push, delete the branch, and switch Railway to deploy from main.&#34;
+        },
+        {
+          &#34;label&#34;: &#34;Push and create a Pull Request&#34;,
+          &#34;description&#34;: &#34;Open a PR from fastreader-phase1 to main for review; Railway keeps deploying the branch.&#34;
+        },
+        {
+          &#34;label&#34;: &#34;Keep the branch as-is&#34;,
+          &#34;description&#34;: &#34;Leave everything where it stands; you handle integration later.&#34;
+        },
+        {
+          &#34;label&#34;: &#34;Discard this work&#34;,
+          &#34;description&#34;: &#34;Permanently delete the branch and its commits (requires typed confirmation).&#34;
+        }
+      ]
+    }
+  ]
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-07-23T21-57-25-265Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-07-23T21-57-25-265Z" class="timestamp-link"><time datetime="2026-07-23T21:57:25.265Z" data-timestamp="2026-07-23T21:57:25.265Z">2026-07-23T21:57:25.265Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>Your questions have been answered: &quot;FastReader phase 1 is complete, tested, and live. What should happen to branch fastreader-phase1?&quot;=&quot;Merge to main locally (Recommended)&quot;. You can now continue with these answers in mind.</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-07-23T21-57-29-526Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-07-23T21-57-29-526Z" class="timestamp-link"><time datetime="2026-07-23T21:57:29.526Z" data-timestamp="2026-07-23T21:57:29.526Z">2026-07-23T21:57:29.526Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_018TuWpZWPhWjwpupFMZaV1h">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Merge feature branch into main, re-run backend tests</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">cd /Users/honglei/code/fastreader &amp;&amp; git checkout main &amp;&amp; git pull --ff-only 2&gt;&amp;1 | tail -1 &amp;&amp; git merge --no-edit fastreader-phase1 2&gt;&amp;1 | tail -2 &amp;&amp; backend/.venv/bin/pytest backend/tests -q 2&gt;&amp;1 | tail -1</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-07-23T21-57-30-542Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-07-23T21-57-30-542Z" class="timestamp-link"><time datetime="2026-07-23T21:57:30.542Z" data-timestamp="2026-07-23T21:57:30.542Z">2026-07-23T21:57:30.542Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>Switched to branch &#x27;main&#x27;
+Your branch is ahead of &#x27;origin/main&#x27; by 2 commits.
+  (use &quot;git push&quot; to publish your local commits)
+Already up to date.
+ create mode 100644 scripts/fetch_paper.py
+ create mode 100644 scripts/validate_data.py
+13 passed, 1 warning in 0.18s</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-07-23T21-57-37-106Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-07-23T21-57-37-106Z" class="timestamp-link"><time datetime="2026-07-23T21:57:37.106Z" data-timestamp="2026-07-23T21:57:37.106Z">2026-07-23T21:57:37.106Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01GBk9MWn7Zzy8xRVuMg2dLN">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Frontend tests on main, push, delete branch</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">cd frontend &amp;&amp; npm test 2&gt;&amp;1 | grep &#34;Tests&#34; &amp;&amp; git push 2&gt;&amp;1 | tail -1 &amp;&amp; git branch -d fastreader-phase1 &amp;&amp; git log --oneline -3</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-07-23T21-57-38-857Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-07-23T21-57-38-857Z" class="timestamp-link"><time datetime="2026-07-23T21:57:38.857Z" data-timestamp="2026-07-23T21:57:38.857Z">2026-07-23T21:57:38.857Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>      Tests  6 passed (6)
+   f1937bb..a0a9d83  main -&gt; main
+Deleted branch fastreader-phase1 (was a0a9d83).
+a0a9d83 fix: page title and favicon
+9c13781 fix: un-ignore frontend/src/lib (Python .gitignore template shadowed it)
+de9b8d3 feat: Docker image and deploy setup</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-07-23T21-57-43-377Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-07-23T21-57-43-377Z" class="timestamp-link"><time datetime="2026-07-23T21:57:43.377Z" data-timestamp="2026-07-23T21:57:43.377Z">2026-07-23T21:57:43.377Z</time></a></div><div class="message-content">
+<div class="thinking"><div class="thinking-label">Thinking</div></div></div></div>
+<div class="message assistant" id="msg-2026-07-23T21-57-43-380Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-07-23T21-57-43-380Z" class="timestamp-link"><time datetime="2026-07-23T21:57:43.380Z" data-timestamp="2026-07-23T21:57:43.380Z">2026-07-23T21:57:43.380Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Merged to <code>main</code>, tests green, pushed, branch deleted. Pointing Railway at <code>main</code>:</p></div></div></div>
+<div class="message assistant" id="msg-2026-07-23T21-57-48-978Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-07-23T21-57-48-978Z" class="timestamp-link"><time datetime="2026-07-23T21:57:48.978Z" data-timestamp="2026-07-23T21:57:48.978Z">2026-07-23T21:57:48.978Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01JYJXK37QW6G64AbqB4zAPQ"><div class="tool-header"><span class="tool-icon">⚙</span> mcp__claude_ai_railway__railway-agent</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;projectId&#34;: &#34;dd798dd3-36df-4a25-8794-08b181b54fe7&#34;,
+  &#34;environmentId&#34;: &#34;1df021b9-83e2-4b35-8bc6-f086ceecb527&#34;,
+  &#34;serviceId&#34;: &#34;90abf7f3-dd4b-47fd-82f3-21da540f548a&#34;,
+  &#34;threadId&#34;: &#34;ca3dc9d5-385d-4720-83b8-af19a3daa76d&#34;,
+  &#34;message&#34;: &#34;The feature branch was merged and deleted. Please set the service&#39;s source branch to \&#34;main\&#34; (repo ppuliu/fastreader), commit the change, and redeploy from main. The PORT=8000 variable and the public domain must stay as they are.&#34;
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-07-23T21-57-55-502Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-07-23T21-57-55-502Z" class="timestamp-link"><time datetime="2026-07-23T21:57:55.502Z" data-timestamp="2026-07-23T21:57:55.502Z">2026-07-23T21:57:55.502Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>{&quot;threadId&quot;:&quot;ca3dc9d5-385d-4720-83b8-af19a3daa76d&quot;,&quot;response&quot;:&quot;Now I&#x27;ll trigger the redeploy from main.Done! The source branch is now set to `main` and redeployed.\n\n**Deployment ID:** `b6567874-2eff-4f87-b5ad-85793db437d8`\n**Public URL:** `https://fastreader.up.railway.app`\n**PORT:** 8000 (unchanged)\n**Public Domain:** port 8000 (unchanged)\n\nThe service is deploying from the merged main branch with all your configuration intact.&quot;,&quot;toolCalls&quot;:[{&quot;toolName&quot;:&quot;updateServiceTool&quot;,&quot;args&quot;:{&quot;serviceId&quot;:&quot;90abf7f3-dd4b-47fd-82f3-21da540f548a&quot;,&quot;config&quot;:{&quot;source&quot;:{&quot;branch&quot;:&quot;main&quot;}}},&quot;result&quot;:{&quot;status&quot;:&quot;applied&quot;,&quot;message&quot;:&quot;Service has been updated and changes are staged for deployment.&quot;},&quot;isError&quot;:false},{&quot;toolName&quot;:&quot;commitStagedChangesTool&quot;,&quot;args&quot;:{},&quot;result&quot;:{&quot;status&quot;:&quot;applied&quot;,&quot;message&quot;:&quot;Staged changes committed and deploying (workflow commitChanges/1df021b9-83e2-4b35-8bc6-f086ceecb527/e0165022-4ac1-4018-8227-ec88a7fd75f7). Use environment status to confirm services come up.&quot;},&quot;isError&quot;:false},{&quot;toolName&quot;:&quot;deployServiceTool&quot;,&quot;args&quot;:{&quot;serviceId&quot;:&quot;90abf7f3-dd4b-47fd-82f3-21da540f548a&quot;},&quot;result&quot;:{&quot;message&quot;:&quot;Deployment triggered for fastreader.&quot;,&quot;serviceId&quot;:&quot;90abf7f3-dd4b-47fd-82f3-21da540f548a&quot;,&quot;serviceName&quot;:&quot;fastreader&quot;,&quot;deploymentId&quot;:&quot;b6567874-2eff-4f87-b5ad-85793db437d8&quot;,&quot;environmentId&quot;:&quot;1df021b9-83e2-4b35-8bc6-f086ceecb527&quot;},&quot;isError&quot;:false}]}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-07-23T21-58-01-786Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-07-23T21-58-01-786Z" class="timestamp-link"><time datetime="2026-07-23T21:58:01.786Z" data-timestamp="2026-07-23T21:58:01.786Z">2026-07-23T21:58:01.786Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_019BUvGty2GjnMa3gQQBLe5y">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Wait for main-branch deploy, verify API and title</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">n=0; until [ $n -ge 40 ] || { s=$(curl -s -m 5 https://fastreader-production.up.railway.app/api/documents 2&gt;/dev/null); echo &#34;$s&#34; | grep -q alice; }; do sleep 10; n=$((n+1)); done; echo &#34;api: $(curl -s -m 5 -o /dev/null -w &#39;%{http_code}&#39; https://fastreader-production.up.railway.app/api/documents)&#34;; curl -s -m 5 https://fastreader-production.up.railway.app/ | grep -o &#34;&lt;title&gt;[^&lt;]*&lt;/title&gt;&#34;</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-07-23T21-58-01-868Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-07-23T21-58-01-868Z" class="timestamp-link"><time datetime="2026-07-23T21:58:01.868Z" data-timestamp="2026-07-23T21:58:01.868Z">2026-07-23T21:58:01.868Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>Command running in background with ID: b2g0wi27m. Output is being written to: /private/tmp/claude-501/-Users-honglei-code-fastreader/d5b4f55f-1f3a-4d77-8177-80957b9ac53a/tasks/b2g0wi27m.output. You will be notified when it completes. To check interim output, use Read on that file path.</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-07-23T21-58-13-576Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-07-23T21-58-13-576Z" class="timestamp-link"><time datetime="2026-07-23T21:58:13.576Z" data-timestamp="2026-07-23T21:58:13.576Z">2026-07-23T21:58:13.576Z</time></a></div><div class="message-content">
+<div class="thinking"><div class="thinking-label">Thinking</div></div></div></div>
+<div class="message assistant" id="msg-2026-07-23T21-58-13-580Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-07-23T21-58-13-580Z" class="timestamp-link"><time datetime="2026-07-23T21:58:13.580Z" data-timestamp="2026-07-23T21:58:13.580Z">2026-07-23T21:58:13.580Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>While the main-branch deploy finishes, housekeeping — shutting down the visual companion server and saving the deployment coordinates to memory:</p></div></div></div>
+<div class="message assistant" id="msg-2026-07-23T21-58-15-003Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-07-23T21-58-15-003Z" class="timestamp-link"><time datetime="2026-07-23T21:58:15.003Z" data-timestamp="2026-07-23T21:58:15.003Z">2026-07-23T21:58:15.003Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01YWzoyfkFb39K2Lpuy1vapG">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Stop visual companion server</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">/Users/honglei/.claude/plugins/cache/claude-plugins-official/superpowers/6.1.1/skills/brainstorming/scripts/stop-server.sh /Users/honglei/code/fastreader/.superpowers/brainstorm/88922-1784839248 2&gt;&amp;1 | tail -1</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-07-23T21-58-15-386Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-07-23T21-58-15-386Z" class="timestamp-link"><time datetime="2026-07-23T21:58:15.386Z" data-timestamp="2026-07-23T21:58:15.386Z">2026-07-23T21:58:15.386Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>{&quot;status&quot;: &quot;stopped&quot;}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-07-23T21-58-21-178Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-07-23T21-58-21-178Z" class="timestamp-link"><time datetime="2026-07-23T21:58:21.178Z" data-timestamp="2026-07-23T21:58:21.178Z">2026-07-23T21:58:21.178Z</time></a></div><div class="message-content"><div class="file-tool write-tool" data-tool-id="toolu_01KCPQpyYDVzjXJY3YLBtrrP">
+<div class="file-tool-header write-header"><span class="file-tool-icon">📝</span> Write <span class="file-tool-path">fastreader-railway-deployment.md</span></div>
+<div class="file-tool-fullpath">/Users/honglei/.claude/projects/-Users-honglei-code-fastreader/memory/fastreader-railway-deployment.md</div>
+<div class="truncatable"><div class="truncatable-content"><pre class="file-content">---
+name: fastreader-railway-deployment
+description: Railway project/service IDs and public URL for the deployed FastReader prototype
+metadata:
+  type: reference
+---
+
+FastReader phase 1 is deployed on Railway (as of 2026-07-23), source = GitHub `ppuliu/fastreader` branch `main`, Dockerfile build.
+
+- Public URL: https://fastreader-production.up.railway.app/
+- Project ID: `dd798dd3-36df-4a25-8794-08b181b54fe7` (name: fastreader)
+- Service ID: `90abf7f3-dd4b-47fd-82f3-21da540f548a` (name: fastreader)
+- Environment ID: `1df021b9-83e2-4b35-8bc6-f086ceecb527` (production)
+- Service variable `PORT=8000` is pinned to match the domain target port — do not remove it (Railway otherwise injects a random PORT and the domain 502s with &#34;Application failed to respond&#34;).
+- Pushes to `main` auto-deploy. No Railway CLI installed locally; use the Railway MCP tools (`railway-agent` for domains/branch/config changes).
+
+Phase 2 next steps live in [[fastreader-phase2-plan]] (not yet written) and in the repo&#39;s spec `docs/superpowers/specs/2026-07-23-fastreader-design.md` §2/§5.
+</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-07-23T21-58-21-247Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-07-23T21-58-21-247Z" class="timestamp-link"><time datetime="2026-07-23T21:58:21.247Z" data-timestamp="2026-07-23T21:58:21.247Z">2026-07-23T21:58:21.247Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>File created successfully at: /Users/honglei/.claude/projects/-Users-honglei-code-fastreader/memory/fastreader-railway-deployment.md</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-07-23T21-58-24-996Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-07-23T21-58-24-996Z" class="timestamp-link"><time datetime="2026-07-23T21:58:24.996Z" data-timestamp="2026-07-23T21:58:24.996Z">2026-07-23T21:58:24.996Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01Sm8wf9HacW4nLMTJ1BUzk2"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/private/tmp/claude-501/-Users-honglei-code-fastreader/d5b4f55f-1f3a-4d77-8177-80957b9ac53a/tasks/b2g0wi27m.output&#34;
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-07-23T21-58-25-043Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-07-23T21-58-25-043Z" class="timestamp-link"><time datetime="2026-07-23T21:58:25.043Z" data-timestamp="2026-07-23T21:58:25.043Z">2026-07-23T21:58:25.043Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>1	api: 200
+2	&lt;title&gt;FastReader&lt;/title&gt;
+3	</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-07-23T21-58-30-251Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-07-23T21-58-30-251Z" class="timestamp-link"><time datetime="2026-07-23T21:58:30.251Z" data-timestamp="2026-07-23T21:58:30.251Z">2026-07-23T21:58:30.251Z</time></a></div><div class="message-content">
+<div class="thinking"><div class="thinking-label">Thinking</div></div></div></div>
+<div class="message assistant" id="msg-2026-07-23T21-58-32-053Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-07-23T21-58-32-053Z" class="timestamp-link"><time datetime="2026-07-23T21:58:32.053Z" data-timestamp="2026-07-23T21:58:32.053Z">2026-07-23T21:58:32.053Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01GTKCHEueGuET1FgNfV7Cgz">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Add memory index pointer</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">grep -q fastreader-railway &#34;/Users/honglei/.claude/projects/-Users-honglei-code-fastreader/memory/MEMORY.md&#34; 2&gt;/dev/null || echo &#34;- [FastReader Railway deployment](fastreader-railway-deployment.md) — project/service IDs, public URL, PORT=8000 pin&#34; &gt;&gt; &#34;/Users/honglei/.claude/projects/-Users-honglei-code-fastreader/memory/MEMORY.md&#34;; echo done</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-07-23T21-58-32-135Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-07-23T21-58-32-135Z" class="timestamp-link"><time datetime="2026-07-23T21:58:32.135Z" data-timestamp="2026-07-23T21:58:32.135Z">2026-07-23T21:58:32.135Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>done</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-07-23T21-58-49-911Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-07-23T21-58-49-911Z" class="timestamp-link"><time datetime="2026-07-23T21:58:49.911Z" data-timestamp="2026-07-23T21:58:49.911Z">2026-07-23T21:58:49.911Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p><strong>FastReader phase 1 is done and live: https://fastreader-production.up.railway.app/</strong> — deploying from <code>main</code>, which now contains the full merged, tested implementation (title tag <code>FastReader</code> on the live site confirms the latest commit is serving).</p>
+<p><strong>What got built</strong>, from brainstorm to production in one session:</p>
+<ul>
+<li><strong>Two documents with true multi-level rewrites</strong> — Alice in Wonderland (5 levels: <em>In one breath · The arc · Twelve chapters · Scene by scene · Every word</em>, 88 → 26,309 words) and the Transformer paper (4 levels). Every intermediate level is continuous prose I wrote scene-by-scene against the real paragraph boundaries, and a validator enforces the span invariants that make anchoring correct.</li>
+<li><strong>The reader</strong> — dark serif/sans typography, hybrid altitude dial (labeled rail that fades to a pill while you read), reading-time badges, first-run hint, and the full zoom input set: pinch, any-modifier+scroll (including macOS's shift→deltaX quirk), scroll-over-dial, double-click / shift+double-click, <code>±</code> keys, dial click and drag.</li>
+<li><strong>Anchored zoom that actually holds</strong> — the production walkthrough dove gist → full text through four different input methods and back out; the round trip returned to the <em>exact same scroll position (9186px)</em>, which is the "point under your cursor never moves" property working precisely.</li>
+<li><strong>Architecture per spec</strong> — ~80-line FastAPI + <code>DocumentStore</code> (phase-2-ready for a Railway Volume), whole-document fetch so zoom is zero-latency client-side, multi-stage Dockerfile, 19 tests green.</li>
+</ul>
+<p><strong>Deploy hiccups fixed along the way</strong> (worth knowing): the GitHub Python <code>.gitignore</code> template was silently excluding <code>frontend/src/lib/</code>; the Railway service initially built from empty <code>main</code>; and Railway injected a random <code>PORT</code> while the domain targeted 8000 — now pinned via <code>PORT=8000</code> (don't delete that variable). All of this, plus the Railway IDs, is saved to memory for next session.</p>
+<p><strong>Natural next steps when you want them:</strong> phase 2 (<code>pipeline.py</code> calling the Claude API + upload endpoint + Volume — the store and JSON format are already shaped for it), the focal-unfold transition upgrade we demoed in brainstorming, and mobile polish.</p></div></div></div>
+<div class="message user" id="msg-2026-07-23T22-01-03-377Z"><div class="message-header"><span class="role-label">User</span><a href="#msg-2026-07-23T22-01-03-377Z" class="timestamp-link"><time datetime="2026-07-23T22:01:03.377Z" data-timestamp="2026-07-23T22:01:03.377Z">2026-07-23T22:01:03.377Z</time></a></div><div class="message-content">
+<div class="user-content"><p><task-notification>
+<task-id>bijvf037c</task-id>
+<tool-use-id>toolu_015QHxSeVdrpy8Gm8ivFDojX</tool-use-id>
+<output-file>/private/tmp/claude-501/-Users-honglei-code-fastreader/d5b4f55f-1f3a-4d77-8177-80957b9ac53a/tasks/bijvf037c.output</output-file>
+<status>completed</status></p>
+<summary>Background command "Poll deployed URL until API responds (max 10 min)" completed (exit code 0)</summary>
+<p></task-notification></p></div></div></div>
+<div class="message assistant" id="msg-2026-07-23T22-01-08-355Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-07-23T22-01-08-355Z" class="timestamp-link"><time datetime="2026-07-23T22:01:08.355Z" data-timestamp="2026-07-23T22:01:08.355Z">2026-07-23T22:01:08.355Z</time></a></div><div class="message-content">
+<div class="thinking"><div class="thinking-label">Thinking</div></div></div></div>
+<div class="message assistant" id="msg-2026-07-23T22-01-09-481Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-07-23T22-01-09-481Z" class="timestamp-link"><time datetime="2026-07-23T22:01:09.481Z" data-timestamp="2026-07-23T22:01:09.481Z">2026-07-23T22:01:09.481Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>That's just the earlier stale poller (aimed at the guessed <code>fastreader.up.railway.app</code> URL) timing out and exiting — nothing to act on. The deployment was already verified live on the real domain: <strong>https://fastreader-production.up.railway.app/</strong>. All work is complete; nothing pending.</p></div></div></div>
+<div class="message user" id="msg-2026-07-23T22-05-03-652Z"><div class="message-header"><span class="role-label">User</span><a href="#msg-2026-07-23T22-05-03-652Z" class="timestamp-link"><time datetime="2026-07-23T22:05:03.652Z" data-timestamp="2026-07-23T22:05:03.652Z">2026-07-23T22:05:03.652Z</time></a></div><div class="message-content">
+<div class="user-content"><p>we still have some time, let's move on to get phase 2 implemented. for phase 2, i think we can use agentsdk to create an agent to do the parsing and rewriting, it can use sonnet as the main model since the rewritting task is not super heavy.</p>
+<p>while you are implementing phase 2, i'm going to spin up a few worktrees to polish the UI / UX a bit, so don't be suprised if you see any changes on the UI. would be good for you to periodically pull from master to monitor any changes from other worktrees.</p></div></div></div>
+<div class="message assistant" id="msg-2026-07-23T22-06-16-779Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-07-23T22-06-16-779Z" class="timestamp-link"><time datetime="2026-07-23T22:06:16.779Z" data-timestamp="2026-07-23T22:06:16.779Z">2026-07-23T22:06:16.779Z</time></a></div><div class="message-content">
+<div class="thinking"><div class="thinking-label">Thinking</div></div></div></div>
+<div class="message assistant" id="msg-2026-07-23T22-06-23-738Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-07-23T22-06-23-738Z" class="timestamp-link"><time datetime="2026-07-23T22:06:23.738Z" data-timestamp="2026-07-23T22:06:23.738Z">2026-07-23T22:06:23.738Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Phase 2 it is — Agent SDK pipeline on Sonnet, uploads, background processing, with you polishing UI in parallel worktrees. I'll work on a <code>phase2-pipeline</code> branch and merge <code>origin/main</code> into it at every checkpoint so your UI changes flow in continuously.</p>
+<p>The spec already covers phase 2's architecture (upload → pipeline → <code>$DATA_DIR</code> volume, job-status files, no DB). The deltas I'm locking in based on your directive — flag anything you'd change and I'll adjust mid-flight:</p>
+<ul>
+<li><strong>Pipeline = an Agent SDK agent on Sonnet</strong> with a <em>validating submit tool</em>: the agent reads the numbered source paragraphs, proposes structure, writes each level, and submits through a tool that runs our span/units validator — validation errors bounce straight back into the loop until the document assembles clean. Same JSON contract as phase 1, so <code>assemble.py</code> and the reader need zero changes.</li>
+<li><strong>Upload scope:</strong> paste text or <code>.txt</code>/<code>.md</code> upload (title/author/kind fields, auto-detected defaults), ~300KB cap. PDFs/epub deferred.</li>
+<li><strong>UX:</strong> an "Add document" card in the library → modal → processing card with live status (parsing → writing levels → validating), polling job JSON every 2s.</li>
+<li><strong>Infra:</strong> Railway Volume at <code>/data</code> (<code>DATA_DIR</code>), plus <code>ANTHROPIC_API_KEY</code> on the service — I'll need that from you (or say the word and I'll copy the key from your local env to your Railway service).</li>
+</ul>
+<p>First, loading the claude-api skill since I'm about to write against the Agent SDK:</p></div></div></div>
+<div class="message assistant" id="msg-2026-07-23T22-06-24-605Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-07-23T22-06-24-605Z" class="timestamp-link"><time datetime="2026-07-23T22:06:24.605Z" data-timestamp="2026-07-23T22:06:24.605Z">2026-07-23T22:06:24.605Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01XfpZR93Tgb4dzprkjsauYj"><div class="tool-header"><span class="tool-icon">⚙</span> Skill</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;skill&#34;: &#34;claude-api&#34;,
+  &#34;args&#34;: &#34;Python Agent SDK: building a document-processing agent with custom in-process tools, Sonnet model id, structured outputs, auth requirements for running in a Docker container&#34;
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-07-23T22-06-24-701Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-07-23T22-06-24-701Z" class="timestamp-link"><time datetime="2026-07-23T22:06:24.701Z" data-timestamp="2026-07-23T22:06:24.701Z">2026-07-23T22:06:24.701Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>Launching skill: claude-api</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+        
+
+<div class="pagination">
+<a href="index.html" class="index-link">Index</a>
+<a href="page-006.html">&larr; Prev</a>
+<a href="page-001.html">1</a>
+<a href="page-002.html">2</a>
+<a href="page-003.html">3</a>
+<a href="page-004.html">4</a>
+<a href="page-005.html">5</a>
+<a href="page-006.html">6</a>
+<span class="current">7</span>
+<a href="page-008.html">8</a>
+<a href="page-009.html">9</a>
+<a href="page-010.html">10</a>
+<a href="page-011.html">11</a>
+<a href="page-008.html">Next &rarr;</a>
+</div>
+
+    </div>
+    <script>
+document.querySelectorAll('time[data-timestamp]').forEach(function(el) {
+    const timestamp = el.getAttribute('data-timestamp');
+    const date = new Date(timestamp);
+    const now = new Date();
+    const isToday = date.toDateString() === now.toDateString();
+    const timeStr = date.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+    if (isToday) { el.textContent = timeStr; }
+    else { el.textContent = date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) + ' ' + timeStr; }
+});
+document.querySelectorAll('pre.json').forEach(function(el) {
+    let text = el.textContent;
+    text = text.replace(/"([^"]+)":/g, '<span style="color: #ce93d8">"$1"</span>:');
+    text = text.replace(/: "([^"]*)"/g, ': <span style="color: #81d4fa">"$1"</span>');
+    text = text.replace(/: (\d+)/g, ': <span style="color: #ffcc80">$1</span>');
+    text = text.replace(/: (true|false|null)/g, ': <span style="color: #f48fb1">$1</span>');
+    el.innerHTML = text;
+});
+document.querySelectorAll('.truncatable').forEach(function(wrapper) {
+    const content = wrapper.querySelector('.truncatable-content');
+    const btn = wrapper.querySelector('.expand-btn');
+    if (content.scrollHeight > 250) {
+        wrapper.classList.add('truncated');
+        btn.addEventListener('click', function() {
+            if (wrapper.classList.contains('truncated')) { wrapper.classList.remove('truncated'); wrapper.classList.add('expanded'); btn.textContent = 'Show less'; }
+            else { wrapper.classList.remove('expanded'); wrapper.classList.add('truncated'); btn.textContent = 'Show more'; }
+        });
+    }
+});
+</script>
+</body>
+</html>
