@@ -148,5 +148,10 @@ def delete_job(job_id: str):
     return {"deleted": job_id}
 
 
+TRANSCRIPTS_DIR = os.environ.get("TRANSCRIPTS_DIR", str(ROOT / "transcripts"))
+if Path(TRANSCRIPTS_DIR).is_dir():
+    # must be mounted before "/" so the prefix wins
+    app.mount("/transcripts", StaticFiles(directory=TRANSCRIPTS_DIR, html=True), name="transcripts")
+
 if Path(STATIC_DIR).is_dir():
     app.mount("/", StaticFiles(directory=STATIC_DIR, html=True), name="static")

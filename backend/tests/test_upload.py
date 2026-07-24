@@ -114,3 +114,22 @@ def test_cannot_delete_running_job(app_env):
     # plain TestClient (no context manager) so startup cleanup doesn't fail the job first
     client = TestClient(app_env.app)
     assert client.delete(f"/api/jobs/{job['id']}").status_code == 409
+
+
+def test_transcripts_served(tmp_path, monkeypatch):
+    builtin = tmp_path / "builtin"
+    builtin.mkdir()
+    (builtin / "stub.json").write_text(json.dumps(make_doc()))
+    tdir = tmp_path / "transcripts"
+    tdir.mkdir()
+    (tdir / "index.html").write_text("<h1>transcript</h1>")
+    monkeypatch.setenv("BUILTIN_DIR", str(builtin))
+    monkeypatch.setenv("DATA_DIR", str(tmp_path / "uploads"))
+    monkeypatch.setenv("TRANSCRIPTS_DIR", str(tdir))
+    import importlib
+    from app import main as main_mod
+    importlib.reload(main_mod)
+    client = TestClient(main_mod.app)
+    r = client.get("/transcripts/")
+    assert r.status_code == 200
+    assert "transcript" in r.text
