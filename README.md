@@ -85,24 +85,17 @@ to that document.
 
 ## Architecture
 
-<!-- TODO: excalidraw diagram goes here -->
+![FastReader architecture — upload, rewrite, read, and zoom paths](docs/architecture.svg)
 
-```
-Browser SPA (Vite + React + TS + Tailwind)
-  Library · Reader = LevelView + AltitudeDial + ZoomController
-  — whole document fetched once; all zooming is client-side —
-        │  GET /api/documents · GET /api/documents/{id}
-        │  POST /api/upload · GET/DELETE /api/jobs/{id}
-        ▼
-FastAPI backend
-  ├── DocumentStore — merges data/builtin/ (shipped in the image)
-  │                   with $DATA_DIR/documents/ (Railway volume)
-  ├── JobStore — one JSON status file per processing job
-  └── background task → scripts/pipeline.py
-        └── Claude Agent SDK (Sonnet) with two in-process tools:
-            get_source (numbered paragraphs + level plan)
-            submit_rewrites (assemble + validate; errors retry the loop)
-```
+*(editable source: [`docs/architecture.excalidraw`](docs/architecture.excalidraw))*
+
+The four paths: **① upload** — the browser posts raw text, FastAPI stores it and queues
+a job. **② rewrite** — a background task hands the document to the agent, which loops
+between reading the source and submitting rewrites until the validator accepts; the
+finished JSON lands on the volume, with job status streamed back to the processing
+card. **③ read** — the reader fetches the whole level pyramid in one request from the
+DocumentStore (built-ins + uploads). **④ zoom** — everything after that is client-side
+span math; no network at all.
 
 One self-contained JSON per document, no database:
 

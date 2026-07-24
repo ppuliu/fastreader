@@ -1,0 +1,76 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1620 760" font-family="sans-serif">
+<defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#1e1e1e"/></marker></defs>
+<rect width="1620" height="760" fill="#ffffff"/>
+<text x="120" y="64.0" font-size="24" fill="#1e1e1e" text-anchor="start" font-weight="bold" font-family="ui-sans-serif, system-ui, sans-serif"><tspan x="120" dy="0">① Upload</tspan></text>
+<text x="660" y="64.0" font-size="24" fill="#1e1e1e" text-anchor="start" font-weight="bold" font-family="ui-sans-serif, system-ui, sans-serif"><tspan x="660" dy="0">② Rewrite</tspan></text>
+<text x="1090" y="64.0" font-size="24" fill="#1e1e1e" text-anchor="start" font-weight="bold" font-family="ui-sans-serif, system-ui, sans-serif"><tspan x="1090" dy="0">③ Read</tspan></text>
+<text x="1350" y="64.0" font-size="24" fill="#1e1e1e" text-anchor="start" font-weight="bold" font-family="ui-sans-serif, system-ui, sans-serif"><tspan x="1350" dy="0">④ Zoom</tspan></text>
+<text x="14" y="163.0" font-size="13" fill="#868e96" text-anchor="start" font-weight="normal" font-family="ui-sans-serif, system-ui, sans-serif"><tspan x="14" dy="0">BROWSER</tspan></text>
+<text x="14" y="383.0" font-size="13" fill="#868e96" text-anchor="start" font-weight="normal" font-family="ui-sans-serif, system-ui, sans-serif"><tspan x="14" dy="0">SERVER</tspan></text>
+<text x="14" y="620.45" font-size="13" fill="#868e96" text-anchor="start" font-weight="normal" font-family="ui-sans-serif, system-ui, sans-serif"><tspan x="14" dy="0">STORAGE</tspan><tspan x="14" dy="17.55">(/data volume</tspan><tspan x="14" dy="17.55">+ image)</tspan></text>
+<rect x="120" y="120" width="200" height="80" rx="10" fill="#a5d8ff" stroke="#1e1e1e" stroke-width="1.5"/>
+<text x="220.0" y="155.55" font-size="14" fill="#1e1e1e" text-anchor="middle" font-weight="normal" font-family="ui-sans-serif, system-ui, sans-serif"><tspan x="220.0" dy="0">Upload modal</tspan><tspan x="220.0" dy="18.900000000000002">paste / .txt / .md</tspan></text>
+<rect x="400" y="120" width="210" height="80" rx="10" fill="#a5d8ff" stroke="#1e1e1e" stroke-width="1.5"/>
+<text x="505.0" y="155.55" font-size="14" fill="#1e1e1e" text-anchor="middle" font-weight="normal" font-family="ui-sans-serif, system-ui, sans-serif"><tspan x="505.0" dy="0">Processing card</tspan><tspan x="505.0" dy="18.900000000000002">polls job status (2s)</tspan></text>
+<rect x="1070" y="120" width="190" height="80" rx="10" fill="#a5d8ff" stroke="#1e1e1e" stroke-width="1.5"/>
+<text x="1165.0" y="165.0" font-size="14" fill="#1e1e1e" text-anchor="middle" font-weight="normal" font-family="ui-sans-serif, system-ui, sans-serif"><tspan x="1165.0" dy="0">Library + Reader</tspan></text>
+<rect x="1340" y="100" width="250" height="120" rx="10" fill="#a5d8ff" stroke="#1e1e1e" stroke-width="1.5"/>
+<text x="1465.0" y="136.65" font-size="14" fill="#1e1e1e" text-anchor="middle" font-weight="normal" font-family="ui-sans-serif, system-ui, sans-serif"><tspan x="1465.0" dy="0">Zoom engine</tspan><tspan x="1465.0" dy="18.900000000000002">focal segment → span math</tspan><tspan x="1465.0" dy="18.900000000000002">→ proportional landing</tspan><tspan x="1465.0" dy="18.900000000000002">+ 300ms crossfade</tspan></text>
+<rect x="120" y="330" width="200" height="80" rx="10" fill="#b2f2bb" stroke="#1e1e1e" stroke-width="1.5"/>
+<text x="220.0" y="365.55" font-size="14" fill="#1e1e1e" text-anchor="middle" font-weight="normal" font-family="ui-sans-serif, system-ui, sans-serif"><tspan x="220.0" dy="0">FastAPI</tspan><tspan x="220.0" dy="18.900000000000002">POST /api/upload</tspan></text>
+<rect x="400" y="445" width="210" height="70" rx="10" fill="#b2f2bb" stroke="#1e1e1e" stroke-width="1.5"/>
+<text x="505.0" y="475.55" font-size="14" fill="#1e1e1e" text-anchor="middle" font-weight="normal" font-family="ui-sans-serif, system-ui, sans-serif"><tspan x="505.0" dy="0">JobStore</tspan><tspan x="505.0" dy="18.900000000000002">one JSON per job</tspan></text>
+<rect x="640" y="320" width="300" height="100" rx="10" fill="#ffec99" stroke="#1e1e1e" stroke-width="1.5"/>
+<text x="790.0" y="356.1" font-size="14" fill="#1e1e1e" text-anchor="middle" font-weight="normal" font-family="ui-sans-serif, system-ui, sans-serif"><tspan x="790.0" dy="0">Rewrite agent</tspan><tspan x="790.0" dy="18.900000000000002">Claude Sonnet · Agent SDK</tspan><tspan x="790.0" dy="18.900000000000002">get_source ⇄ submit_rewrites</tspan></text>
+<rect x="660" y="470" width="260" height="60" rx="10" fill="#ffc9c9" stroke="#1e1e1e" stroke-width="1.5"/>
+<text x="790.0" y="495.55" font-size="14" fill="#1e1e1e" text-anchor="middle" font-weight="normal" font-family="ui-sans-serif, system-ui, sans-serif"><tspan x="790.0" dy="0">Assembler + Validator</tspan><tspan x="790.0" dy="18.900000000000002">spans must tile every level</tspan></text>
+<rect x="1070" y="340" width="210" height="80" rx="10" fill="#b2f2bb" stroke="#1e1e1e" stroke-width="1.5"/>
+<text x="1175.0" y="375.55" font-size="14" fill="#1e1e1e" text-anchor="middle" font-weight="normal" font-family="ui-sans-serif, system-ui, sans-serif"><tspan x="1175.0" dy="0">DocumentStore</tspan><tspan x="1175.0" dy="18.900000000000002">merges builtin + uploads</tspan></text>
+<rect x="140" y="620" width="160" height="60" rx="10" fill="#e9ecef" stroke="#1e1e1e" stroke-width="1.5"/>
+<text x="220.0" y="655.0" font-size="14" fill="#1e1e1e" text-anchor="middle" font-weight="normal" font-family="ui-sans-serif, system-ui, sans-serif"><tspan x="220.0" dy="0">/data/raw</tspan></text>
+<rect x="425" y="620" width="160" height="60" rx="10" fill="#e9ecef" stroke="#1e1e1e" stroke-width="1.5"/>
+<text x="505.0" y="655.0" font-size="14" fill="#1e1e1e" text-anchor="middle" font-weight="normal" font-family="ui-sans-serif, system-ui, sans-serif"><tspan x="505.0" dy="0">/data/jobs</tspan></text>
+<rect x="700" y="620" width="180" height="60" rx="10" fill="#e9ecef" stroke="#1e1e1e" stroke-width="1.5"/>
+<text x="790.0" y="655.0" font-size="14" fill="#1e1e1e" text-anchor="middle" font-weight="normal" font-family="ui-sans-serif, system-ui, sans-serif"><tspan x="790.0" dy="0">/data/documents</tspan></text>
+<rect x="1090" y="610" width="200" height="70" rx="10" fill="#e9ecef" stroke="#1e1e1e" stroke-width="1.5"/>
+<text x="1190.0" y="640.55" font-size="14" fill="#1e1e1e" text-anchor="middle" font-weight="normal" font-family="ui-sans-serif, system-ui, sans-serif"><tspan x="1190.0" dy="0">data/builtin</tspan><tspan x="1190.0" dy="18.900000000000002">Alice · Attention paper</tspan></text>
+<line x1="220.0" y1="200" x2="220.0" y2="330" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#ah)"/>
+<rect x="173.1" y="246.0" width="93.8" height="15" fill="#ffffff" opacity="0.88"/>
+<text x="220.0" y="258.0" font-size="12" fill="#495057" text-anchor="middle" font-weight="normal" font-family="ui-sans-serif, system-ui, sans-serif"><tspan x="220.0" dy="0">① upload text</tspan></text>
+<line x1="220.0" y1="410" x2="220.0" y2="620" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#ah)"/>
+<rect x="189.6" y="496.0" width="60.8" height="15" fill="#ffffff" opacity="0.88"/>
+<text x="220.0" y="508.0" font-size="12" fill="#495057" text-anchor="middle" font-weight="normal" font-family="ui-sans-serif, system-ui, sans-serif"><tspan x="220.0" dy="0">raw text</tspan></text>
+<line x1="280.0" y1="410" x2="400" y2="480.0" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#ah)"/>
+<rect x="303.0" y="448.0" width="74.0" height="15" fill="#ffffff" opacity="0.88"/>
+<text x="340.0" y="460.0" font-size="12" fill="#495057" text-anchor="middle" font-weight="normal" font-family="ui-sans-serif, system-ui, sans-serif"><tspan x="340.0" dy="0">create job</tspan></text>
+<line x1="505.0" y1="515" x2="505.0" y2="620" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#ah)"/>
+<line x1="505.0" y1="200" x2="505.0" y2="445" stroke="#1e1e1e" stroke-width="1.5" stroke-dasharray="6 5" marker-end="url(#ah)"/>
+<rect x="458.1" y="266.75" width="93.8" height="15" fill="#ffffff" opacity="0.88"/>
+<text x="505.0" y="278.75" font-size="12" fill="#495057" text-anchor="middle" font-weight="normal" font-family="ui-sans-serif, system-ui, sans-serif"><tspan x="505.0" dy="0">GET /api/jobs</tspan></text>
+<line x1="320" y1="370.0" x2="640" y2="370.0" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#ah)"/>
+<rect x="419.9" y="349.0" width="120.19999999999999" height="15" fill="#ffffff" opacity="0.88"/>
+<text x="480.0" y="361.0" font-size="12" fill="#495057" text-anchor="middle" font-weight="normal" font-family="ui-sans-serif, system-ui, sans-serif"><tspan x="480.0" dy="0">② background task</tspan></text>
+<line x1="790.0" y1="420" x2="790.0" y2="470" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#ah)"/>
+<rect x="736.5" y="434.0" width="107.0" height="15" fill="#ffffff" opacity="0.88"/>
+<text x="790.0" y="446.0" font-size="12" fill="#495057" text-anchor="middle" font-weight="normal" font-family="ui-sans-serif, system-ui, sans-serif"><tspan x="790.0" dy="0">submit rewrites</tspan></text>
+<path d="M 920 500.0 Q 975 435.0 940 370.0" fill="none" stroke="#1e1e1e" stroke-width="1.5" stroke-dasharray="6 5" marker-end="url(#ah)"/>
+<rect x="955" y="424.0" width="100.39999999999999" height="15" fill="#ffffff" opacity="0.88"/>
+<text x="955" y="436.0" font-size="12" fill="#495057" text-anchor="start" font-weight="normal" font-family="ui-sans-serif, system-ui, sans-serif"><tspan x="955" dy="0">errors → retry</tspan></text>
+<line x1="640" y1="400.0" x2="610" y2="480.0" stroke="#1e1e1e" stroke-width="1.5" stroke-dasharray="6 5" marker-end="url(#ah)"/>
+<rect x="573.3" y="447.0" width="100.39999999999999" height="15" fill="#ffffff" opacity="0.88"/>
+<text x="623.5" y="459.0" font-size="12" fill="#495057" text-anchor="middle" font-weight="normal" font-family="ui-sans-serif, system-ui, sans-serif"><tspan x="623.5" dy="0">status updates</tspan></text>
+<line x1="790.0" y1="530" x2="790.0" y2="620" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#ah)"/>
+<rect x="723.3" y="560.5" width="133.39999999999998" height="15" fill="#ffffff" opacity="0.88"/>
+<text x="790.0" y="572.5" font-size="12" fill="#495057" text-anchor="middle" font-weight="normal" font-family="ui-sans-serif, system-ui, sans-serif"><tspan x="790.0" dy="0">valid document JSON</tspan></text>
+<line x1="1115.0" y1="200" x2="1120.0" y2="340" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#ah)"/>
+<rect x="1036.6" y="223.0" width="159.79999999999998" height="15" fill="#ffffff" opacity="0.88"/>
+<text x="1116.5" y="235.0" font-size="12" fill="#495057" text-anchor="middle" font-weight="normal" font-family="ui-sans-serif, system-ui, sans-serif"><tspan x="1116.5" dy="0">③ GET /api/documents/id</tspan></text>
+<line x1="1230.0" y1="340" x2="1215.0" y2="200" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#ah)"/>
+<rect x="1155.2" y="276.2" width="140.0" height="15" fill="#ffffff" opacity="0.88"/>
+<text x="1225.2" y="288.2" font-size="12" fill="#495057" text-anchor="middle" font-weight="normal" font-family="ui-sans-serif, system-ui, sans-serif"><tspan x="1225.2" dy="0">full pyramid ~300 KB</tspan></text>
+<line x1="850.0" y1="620" x2="1105.0" y2="420" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#ah)"/>
+<line x1="1190.0" y1="610" x2="1205.0" y2="420" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#ah)"/>
+<line x1="1260" y1="160.0" x2="1340" y2="160.0" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#ah)"/>
+<rect x="1233.3" y="175.0" width="133.39999999999998" height="15" fill="#ffffff" opacity="0.88"/>
+<text x="1300.0" y="187.0" font-size="12" fill="#495057" text-anchor="middle" font-weight="normal" font-family="ui-sans-serif, system-ui, sans-serif"><tspan x="1300.0" dy="0">④ zoom · no network</tspan></text>
+</svg>
