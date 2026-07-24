@@ -1,0 +1,1056 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Claude Code transcript - page 10</title>
+    <style>
+:root { --bg-color: #f5f5f5; --card-bg: #ffffff; --user-bg: #e3f2fd; --user-border: #1976d2; --assistant-bg: #f5f5f5; --assistant-border: #9e9e9e; --thinking-bg: #fff8e1; --thinking-border: #ffc107; --thinking-text: #666; --tool-bg: #f3e5f5; --tool-border: #9c27b0; --tool-result-bg: #e8f5e9; --tool-error-bg: #ffebee; --text-color: #212121; --text-muted: #757575; --code-bg: #263238; --code-text: #aed581; }
+* { box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg-color); color: var(--text-color); margin: 0; padding: 16px; line-height: 1.6; }
+.container { max-width: 800px; margin: 0 auto; }
+h1 { font-size: 1.5rem; margin-bottom: 24px; padding-bottom: 8px; border-bottom: 2px solid var(--user-border); }
+.header-row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; border-bottom: 2px solid var(--user-border); padding-bottom: 8px; margin-bottom: 24px; }
+.header-row h1 { border-bottom: none; padding-bottom: 0; margin-bottom: 0; flex: 1; min-width: 200px; }
+.message { margin-bottom: 16px; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+.message.user { background: var(--user-bg); border-left: 4px solid var(--user-border); }
+.message.assistant { background: var(--card-bg); border-left: 4px solid var(--assistant-border); }
+.message.tool-reply { background: #fff8e1; border-left: 4px solid #ff9800; }
+.tool-reply .role-label { color: #e65100; }
+.tool-reply .tool-result { background: transparent; padding: 0; margin: 0; }
+.tool-reply .tool-result .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, #fff8e1); }
+.message-header { display: flex; justify-content: space-between; align-items: center; padding: 8px 16px; background: rgba(0,0,0,0.03); font-size: 0.85rem; }
+.role-label { font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+.user .role-label { color: var(--user-border); }
+time { color: var(--text-muted); font-size: 0.8rem; }
+.timestamp-link { color: inherit; text-decoration: none; }
+.timestamp-link:hover { text-decoration: underline; }
+.message:target { animation: highlight 2s ease-out; }
+@keyframes highlight { 0% { background-color: rgba(25, 118, 210, 0.2); } 100% { background-color: transparent; } }
+.message-content { padding: 16px; }
+.message-content p { margin: 0 0 12px 0; }
+.message-content p:last-child { margin-bottom: 0; }
+.thinking { background: var(--thinking-bg); border: 1px solid var(--thinking-border); border-radius: 8px; padding: 12px; margin: 12px 0; font-size: 0.9rem; color: var(--thinking-text); }
+.thinking-label { font-size: 0.75rem; font-weight: 600; text-transform: uppercase; color: #f57c00; margin-bottom: 8px; }
+.thinking p { margin: 8px 0; }
+.assistant-text { margin: 8px 0; }
+.tool-use { background: var(--tool-bg); border: 1px solid var(--tool-border); border-radius: 8px; padding: 12px; margin: 12px 0; }
+.tool-header { font-weight: 600; color: var(--tool-border); margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+.tool-icon { font-size: 1.1rem; }
+.tool-description { font-size: 0.9rem; color: var(--text-muted); margin-bottom: 8px; font-style: italic; }
+.tool-result { background: var(--tool-result-bg); border-radius: 8px; padding: 12px; margin: 12px 0; }
+.tool-result.tool-error { background: var(--tool-error-bg); }
+.file-tool { border-radius: 8px; padding: 12px; margin: 12px 0; }
+.write-tool { background: linear-gradient(135deg, #e3f2fd 0%, #e8f5e9 100%); border: 1px solid #4caf50; }
+.edit-tool { background: linear-gradient(135deg, #fff3e0 0%, #fce4ec 100%); border: 1px solid #ff9800; }
+.file-tool-header { font-weight: 600; margin-bottom: 4px; display: flex; align-items: center; gap: 8px; font-size: 0.95rem; }
+.write-header { color: #2e7d32; }
+.edit-header { color: #e65100; }
+.file-tool-icon { font-size: 1rem; }
+.file-tool-path { font-family: monospace; background: rgba(0,0,0,0.08); padding: 2px 8px; border-radius: 4px; }
+.file-tool-fullpath { font-family: monospace; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px; word-break: break-all; }
+.file-content { margin: 0; }
+.edit-section { display: flex; margin: 4px 0; border-radius: 4px; overflow: hidden; }
+.edit-label { padding: 8px 12px; font-weight: bold; font-family: monospace; display: flex; align-items: flex-start; }
+.edit-old { background: #fce4ec; }
+.edit-old .edit-label { color: #b71c1c; background: #f8bbd9; }
+.edit-old .edit-content { color: #880e4f; }
+.edit-new { background: #e8f5e9; }
+.edit-new .edit-label { color: #1b5e20; background: #a5d6a7; }
+.edit-new .edit-content { color: #1b5e20; }
+.edit-content { margin: 0; flex: 1; background: transparent; font-size: 0.85rem; }
+.edit-replace-all { font-size: 0.75rem; font-weight: normal; color: var(--text-muted); }
+.write-tool .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, #e6f4ea); }
+.edit-tool .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, #fff0e5); }
+.todo-list { background: linear-gradient(135deg, #e8f5e9 0%, #f1f8e9 100%); border: 1px solid #81c784; border-radius: 8px; padding: 12px; margin: 12px 0; }
+.todo-header { font-weight: 600; color: #2e7d32; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; font-size: 0.95rem; }
+.todo-items { list-style: none; margin: 0; padding: 0; }
+.todo-item { display: flex; align-items: flex-start; gap: 10px; padding: 6px 0; border-bottom: 1px solid rgba(0,0,0,0.06); font-size: 0.9rem; }
+.todo-item:last-child { border-bottom: none; }
+.todo-icon { flex-shrink: 0; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-weight: bold; border-radius: 50%; }
+.todo-completed .todo-icon { color: #2e7d32; background: rgba(46, 125, 50, 0.15); }
+.todo-completed .todo-content { color: #558b2f; text-decoration: line-through; }
+.todo-in-progress .todo-icon { color: #f57c00; background: rgba(245, 124, 0, 0.15); }
+.todo-in-progress .todo-content { color: #e65100; font-weight: 500; }
+.todo-pending .todo-icon { color: #757575; background: rgba(0,0,0,0.05); }
+.todo-pending .todo-content { color: #616161; }
+pre { background: var(--code-bg); color: var(--code-text); padding: 12px; border-radius: 6px; overflow-x: auto; font-size: 0.85rem; line-height: 1.5; margin: 8px 0; white-space: pre-wrap; word-wrap: break-word; }
+pre.json { color: #e0e0e0; }
+code { background: rgba(0,0,0,0.08); padding: 2px 6px; border-radius: 4px; font-size: 0.9em; }
+pre code { background: none; padding: 0; }
+.user-content { margin: 0; }
+.truncatable { position: relative; }
+.truncatable.truncated .truncatable-content { max-height: 200px; overflow: hidden; }
+.truncatable.truncated::after { content: ''; position: absolute; bottom: 32px; left: 0; right: 0; height: 60px; background: linear-gradient(to bottom, transparent, var(--card-bg)); pointer-events: none; }
+.message.user .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, var(--user-bg)); }
+.message.tool-reply .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, #fff8e1); }
+.tool-use .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, var(--tool-bg)); }
+.tool-result .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, var(--tool-result-bg)); }
+.expand-btn { display: none; width: 100%; padding: 8px 16px; margin-top: 4px; background: rgba(0,0,0,0.05); border: 1px solid rgba(0,0,0,0.1); border-radius: 6px; cursor: pointer; font-size: 0.85rem; color: var(--text-muted); }
+.expand-btn:hover { background: rgba(0,0,0,0.1); }
+.truncatable.truncated .expand-btn, .truncatable.expanded .expand-btn { display: block; }
+.pagination { display: flex; justify-content: center; gap: 8px; margin: 24px 0; flex-wrap: wrap; }
+.pagination a, .pagination span { padding: 5px 10px; border-radius: 6px; text-decoration: none; font-size: 0.85rem; }
+.pagination a { background: var(--card-bg); color: var(--user-border); border: 1px solid var(--user-border); }
+.pagination a:hover { background: var(--user-bg); }
+.pagination .current { background: var(--user-border); color: white; }
+.pagination .disabled { color: var(--text-muted); border: 1px solid #ddd; }
+.pagination .index-link { background: var(--user-border); color: white; }
+details.continuation { margin-bottom: 16px; }
+details.continuation summary { cursor: pointer; padding: 12px 16px; background: var(--user-bg); border-left: 4px solid var(--user-border); border-radius: 12px; font-weight: 500; color: var(--text-muted); }
+details.continuation summary:hover { background: rgba(25, 118, 210, 0.15); }
+details.continuation[open] summary { border-radius: 12px 12px 0 0; margin-bottom: 0; }
+.index-item { margin-bottom: 16px; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); background: var(--user-bg); border-left: 4px solid var(--user-border); }
+.index-item a { display: block; text-decoration: none; color: inherit; }
+.index-item a:hover { background: rgba(25, 118, 210, 0.1); }
+.index-item-header { display: flex; justify-content: space-between; align-items: center; padding: 8px 16px; background: rgba(0,0,0,0.03); font-size: 0.85rem; }
+.index-item-number { font-weight: 600; color: var(--user-border); }
+.index-item-content { padding: 16px; }
+.index-item-stats { padding: 8px 16px 12px 32px; font-size: 0.85rem; color: var(--text-muted); border-top: 1px solid rgba(0,0,0,0.06); }
+.index-item-commit { margin-top: 6px; padding: 4px 8px; background: #fff3e0; border-radius: 4px; font-size: 0.85rem; color: #e65100; }
+.index-item-commit code { background: rgba(0,0,0,0.08); padding: 1px 4px; border-radius: 3px; font-size: 0.8rem; margin-right: 6px; }
+.commit-card { margin: 8px 0; padding: 10px 14px; background: #fff3e0; border-left: 4px solid #ff9800; border-radius: 6px; }
+.commit-card a { text-decoration: none; color: #5d4037; display: block; }
+.commit-card a:hover { color: #e65100; }
+.commit-card-hash { font-family: monospace; color: #e65100; font-weight: 600; margin-right: 8px; }
+.index-commit { margin-bottom: 12px; padding: 10px 16px; background: #fff3e0; border-left: 4px solid #ff9800; border-radius: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+.index-commit a { display: block; text-decoration: none; color: inherit; }
+.index-commit a:hover { background: rgba(255, 152, 0, 0.1); margin: -10px -16px; padding: 10px 16px; border-radius: 8px; }
+.index-commit-header { display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; margin-bottom: 4px; }
+.index-commit-hash { font-family: monospace; color: #e65100; font-weight: 600; }
+.index-commit-msg { color: #5d4037; }
+.index-item-long-text { margin-top: 8px; padding: 12px; background: var(--card-bg); border-radius: 8px; border-left: 3px solid var(--assistant-border); }
+.index-item-long-text .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, var(--card-bg)); }
+.index-item-long-text-content { color: var(--text-color); }
+#search-box { display: none; align-items: center; gap: 8px; }
+#search-box input { padding: 6px 12px; border: 1px solid var(--assistant-border); border-radius: 6px; font-size: 16px; width: 180px; }
+#search-box button, #modal-search-btn, #modal-close-btn { background: var(--user-border); color: white; border: none; border-radius: 6px; padding: 6px 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+#search-box button:hover, #modal-search-btn:hover { background: #1565c0; }
+#modal-close-btn { background: var(--text-muted); margin-left: 8px; }
+#modal-close-btn:hover { background: #616161; }
+#search-modal[open] { border: none; border-radius: 12px; box-shadow: 0 4px 24px rgba(0,0,0,0.2); padding: 0; width: 90vw; max-width: 900px; height: 80vh; max-height: 80vh; display: flex; flex-direction: column; }
+#search-modal::backdrop { background: rgba(0,0,0,0.5); }
+.search-modal-header { display: flex; align-items: center; gap: 8px; padding: 16px; border-bottom: 1px solid var(--assistant-border); background: var(--bg-color); border-radius: 12px 12px 0 0; }
+.search-modal-header input { flex: 1; padding: 8px 12px; border: 1px solid var(--assistant-border); border-radius: 6px; font-size: 16px; }
+#search-status { padding: 8px 16px; font-size: 0.85rem; color: var(--text-muted); border-bottom: 1px solid rgba(0,0,0,0.06); }
+#search-results { flex: 1; overflow-y: auto; padding: 16px; }
+.search-result { margin-bottom: 16px; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+.search-result a { display: block; text-decoration: none; color: inherit; }
+.search-result a:hover { background: rgba(25, 118, 210, 0.05); }
+.search-result-page { padding: 6px 12px; background: rgba(0,0,0,0.03); font-size: 0.8rem; color: var(--text-muted); border-bottom: 1px solid rgba(0,0,0,0.06); }
+.search-result-content { padding: 12px; }
+.search-result mark { background: #fff59d; padding: 1px 2px; border-radius: 2px; }
+@media (max-width: 600px) { body { padding: 8px; } .message, .index-item { border-radius: 8px; } .message-content, .index-item-content { padding: 12px; } pre { font-size: 0.8rem; padding: 8px; } #search-box input { width: 120px; } #search-modal[open] { width: 95vw; height: 90vh; } }
+</style>
+</head>
+<body>
+    <div class="container">
+        <h1><a href="index.html" style="color: inherit; text-decoration: none;">Claude Code transcript</a> - page 10/11</h1>
+        
+
+<div class="pagination">
+<a href="index.html" class="index-link">Index</a>
+<a href="page-009.html">&larr; Prev</a>
+<a href="page-001.html">1</a>
+<a href="page-002.html">2</a>
+<a href="page-003.html">3</a>
+<a href="page-004.html">4</a>
+<a href="page-005.html">5</a>
+<a href="page-006.html">6</a>
+<a href="page-007.html">7</a>
+<a href="page-008.html">8</a>
+<a href="page-009.html">9</a>
+<span class="current">10</span>
+<a href="page-011.html">11</a>
+<a href="page-011.html">Next &rarr;</a>
+</div>
+
+        
+<div class="message user" id="msg-2026-07-23T22-34-16-637Z"><div class="message-header"><span class="role-label">User</span><a href="#msg-2026-07-23T22-34-16-637Z" class="timestamp-link"><time datetime="2026-07-23T22:34:16.637Z" data-timestamp="2026-07-23T22:34:16.637Z">2026-07-23T22:34:16.637Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>[Image: source: /var/folders/pl/_8p4sj7177n0srtwj0vm6tph0000gn/T/orca-paste-1784845953600-7d227b56-300e-44a3-9e71-82f28f7f304f.png]</p></div></div></div>
+<div class="message assistant" id="msg-2026-07-23T22-34-37-810Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-07-23T22-34-37-810Z" class="timestamp-link"><time datetime="2026-07-23T22:34:37.810Z" data-timestamp="2026-07-23T22:34:37.810Z">2026-07-23T22:34:37.810Z</time></a></div><div class="message-content">
+<div class="thinking"><div class="thinking-label">Thinking</div></div></div></div>
+<div class="message assistant" id="msg-2026-07-23T22-34-40-745Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-07-23T22-34-40-745Z" class="timestamp-link"><time datetime="2026-07-23T22:34:40.745Z" data-timestamp="2026-07-23T22:34:40.745Z">2026-07-23T22:34:40.745Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>That screenshot also tells me your custom domain (fastreader.honglei.ai) is live — nice. The bug is real: <strong>Dismiss is only client-side React state</strong>, so the failed card resurrects on every reload, and stale job files live forever on the volume. Proper fix: a <code>DELETE /api/jobs/{id}</code> endpoint and making Dismiss actually delete the job server-side. (The "processing" card in your screenshot was my live verification run mid-flight — that one completed and became the Yellow Wallpaper book card.)</p></div></div></div>
+<div class="message assistant" id="msg-2026-07-23T22-34-41-515Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-07-23T22-34-41-515Z" class="timestamp-link"><time datetime="2026-07-23T22:34:41.515Z" data-timestamp="2026-07-23T22:34:41.515Z">2026-07-23T22:34:41.515Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01EfBXCWFYYRxRdWdJ3BfECt">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Sync with main before fixing (user worktrees may have pushed)</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">git fetch origin &amp;&amp; git status -sb | head -2 &amp;&amp; git pull --ff-only 2&gt;&amp;1 | tail -1</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-07-23T22-34-42-401Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-07-23T22-34-42-401Z" class="timestamp-link"><time datetime="2026-07-23T22:34:42.401Z" data-timestamp="2026-07-23T22:34:42.401Z">2026-07-23T22:34:42.401Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>## main...origin/main
+Already up to date.</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-07-23T22-34-49-576Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-07-23T22-34-49-576Z" class="timestamp-link"><time datetime="2026-07-23T22:34:49.576Z" data-timestamp="2026-07-23T22:34:49.576Z">2026-07-23T22:34:49.576Z</time></a></div><div class="message-content"><div class="file-tool edit-tool" data-tool-id="toolu_01C6jAV38ztgH6afrm4g7KZF">
+<div class="file-tool-header edit-header"><span class="file-tool-icon">✏️</span> Edit <span class="file-tool-path">jobs.py</span></div>
+<div class="file-tool-fullpath">/Users/honglei/code/fastreader/backend/app/jobs.py</div>
+<div class="truncatable"><div class="truncatable-content">
+<div class="edit-section edit-old"><div class="edit-label">−</div><pre class="edit-content">    def list(self, limit: int = 20) -&gt; list[dict]:</pre></div>
+<div class="edit-section edit-new"><div class="edit-label">+</div><pre class="edit-content">    def delete(self, job_id: str) -&gt; bool:
+        path = self._path(job_id)
+        if not path.is_file():
+            return False
+        path.unlink()
+        return True
+
+    def list(self, limit: int = 20) -&gt; list[dict]:</pre></div>
+</div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-07-23T22-34-49-654Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-07-23T22-34-49-654Z" class="timestamp-link"><time datetime="2026-07-23T22:34:49.654Z" data-timestamp="2026-07-23T22:34:49.654Z">2026-07-23T22:34:49.654Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /Users/honglei/code/fastreader/backend/app/jobs.py has been updated successfully. (file state is current in your context — no need to Read it back)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-07-23T22-34-52-814Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-07-23T22-34-52-814Z" class="timestamp-link"><time datetime="2026-07-23T22:34:52.814Z" data-timestamp="2026-07-23T22:34:52.814Z">2026-07-23T22:34:52.814Z</time></a></div><div class="message-content"><div class="file-tool edit-tool" data-tool-id="toolu_01ME4PRWp9NtoMP3QiR7CTbd">
+<div class="file-tool-header edit-header"><span class="file-tool-icon">✏️</span> Edit <span class="file-tool-path">main.py</span></div>
+<div class="file-tool-fullpath">/Users/honglei/code/fastreader/backend/app/main.py</div>
+<div class="truncatable"><div class="truncatable-content">
+<div class="edit-section edit-old"><div class="edit-label">−</div><pre class="edit-content">@app.get(&#34;/api/jobs/{job_id}&#34;)
+def get_job(job_id: str):
+    job = jobs.get(job_id)
+    if job is None:
+        raise HTTPException(status_code=404, detail=&#34;job not found&#34;)
+    return job</pre></div>
+<div class="edit-section edit-new"><div class="edit-label">+</div><pre class="edit-content">@app.get(&#34;/api/jobs/{job_id}&#34;)
+def get_job(job_id: str):
+    job = jobs.get(job_id)
+    if job is None:
+        raise HTTPException(status_code=404, detail=&#34;job not found&#34;)
+    return job
+
+
+@app.delete(&#34;/api/jobs/{job_id}&#34;)
+def delete_job(job_id: str):
+    job = jobs.get(job_id)
+    if job is None:
+        raise HTTPException(status_code=404, detail=&#34;job not found&#34;)
+    if job[&#34;status&#34;] in (&#34;queued&#34;, &#34;processing&#34;):
+        raise HTTPException(status_code=409, detail=&#34;job is still running&#34;)
+    jobs.delete(job_id)
+    return {&#34;deleted&#34;: job_id}</pre></div>
+</div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-07-23T22-34-52-889Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-07-23T22-34-52-889Z" class="timestamp-link"><time datetime="2026-07-23T22:34:52.889Z" data-timestamp="2026-07-23T22:34:52.889Z">2026-07-23T22:34:52.889Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /Users/honglei/code/fastreader/backend/app/main.py has been updated successfully. (file state is current in your context — no need to Read it back)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-07-23T22-35-02-745Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-07-23T22-35-02-745Z" class="timestamp-link"><time datetime="2026-07-23T22:35:02.745Z" data-timestamp="2026-07-23T22:35:02.745Z">2026-07-23T22:35:02.745Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_015443dQZ5gicTokGbqxjS8c">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Add delete-job tests, run suite</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">cat &gt;&gt; backend/tests/test_upload.py &lt;&lt;&#39;EOF&#39;
+
+
+def test_dismiss_deletes_failed_job(app_env, monkeypatch):
+    import scripts.pipeline as pipeline_mod
+
+    async def boom(*a, **kw):
+        raise RuntimeError(&#34;nope&#34;)
+
+    monkeypatch.setattr(pipeline_mod, &#34;run_pipeline&#34;, boom)
+    client = TestClient(app_env.app)
+    r = client.post(&#34;/api/upload&#34;, json={&#34;title&#34;: &#34;Bad&#34;, &#34;text&#34;: LONG_TEXT})
+    job_id = r.json()[&#34;job_id&#34;]
+    assert client.delete(f&#34;/api/jobs/{job_id}&#34;).status_code == 200
+    assert client.get(f&#34;/api/jobs/{job_id}&#34;).status_code == 404
+    assert client.delete(f&#34;/api/jobs/{job_id}&#34;).status_code == 404
+
+
+def test_cannot_delete_running_job(app_env):
+    job = app_env.jobs.create(doc_id=&#34;x&#34;, title=&#34;X&#34;)
+    app_env.jobs.update(job[&#34;id&#34;], status=&#34;processing&#34;)
+    client = TestClient(app_env.app, raise_server_exceptions=False)
+    # note: plain TestClient (no context manager) so startup cleanup doesn&#39;t fail the job first
+    import httpx
+    resp = httpx.Client(transport=httpx.ASGITransport(app=app_env.app), base_url=&#34;http://t&#34;).delete(f&#34;/api/jobs/{job[&#39;id&#39;]}&#34;)
+    assert resp.status_code == 409
+EOF
+backend/.venv/bin/pytest backend/tests -q 2&gt;&amp;1 | tail -1</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-07-23T22-35-03-527Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-07-23T22-35-03-527Z" class="timestamp-link"><time datetime="2026-07-23T22:35:03.527Z" data-timestamp="2026-07-23T22:35:03.527Z">2026-07-23T22:35:03.527Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>1 failed, 26 passed, 27 warnings in 0.44s</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-07-23T22-35-09-458Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-07-23T22-35-09-458Z" class="timestamp-link"><time datetime="2026-07-23T22:35:09.458Z" data-timestamp="2026-07-23T22:35:09.458Z">2026-07-23T22:35:09.458Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01Vb4JCXuc5BGY7sZmXj2cSK">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">See which test failed</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">backend/.venv/bin/pytest backend/tests -q 2&gt;&amp;1 | grep -B5 &#34;FAILED\|Error&#34; | head -20</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-07-23T22-35-10-070Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-07-23T22-35-10-070Z" class="timestamp-link"><time datetime="2026-07-23T22:35:10.070Z" data-timestamp="2026-07-23T22:35:10.070Z">2026-07-23T22:35:10.070Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>        &quot;&quot;&quot;
+        transport = self._transport_for_url(request.url)
+        start = time.perf_counter()
+    
+        if not isinstance(request.stream, SyncByteStream):
+            raise RuntimeError(
+--
+            )
+    
+        with request_context(request=request):
+&gt;           response = transport.handle_request(request)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^
+E           AttributeError: &#x27;ASGITransport&#x27; object has no attribute &#x27;handle_request&#x27;. Did you mean: &#x27;handle_async_request&#x27;?
+
+backend/.venv/lib/python3.13/site-packages/httpx/_client.py:1014: AttributeError
+--
+          
+    return self.router.on_event(event_type)  # ty: ignore[deprecated]
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-07-23T22-35-17-192Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-07-23T22-35-17-192Z" class="timestamp-link"><time datetime="2026-07-23T22:35:17.192Z" data-timestamp="2026-07-23T22:35:17.192Z">2026-07-23T22:35:17.192Z</time></a></div><div class="message-content">
+<div class="thinking"><div class="thinking-label">Thinking</div></div></div></div>
+<div class="message assistant" id="msg-2026-07-23T22-35-19-535Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-07-23T22-35-19-535Z" class="timestamp-link"><time datetime="2026-07-23T22:35:19.535Z" data-timestamp="2026-07-23T22:35:19.535Z">2026-07-23T22:35:19.535Z</time></a></div><div class="message-content"><div class="file-tool edit-tool" data-tool-id="toolu_01XVCWAXbugfGaVMf3Xn2Gx4">
+<div class="file-tool-header edit-header"><span class="file-tool-icon">✏️</span> Edit <span class="file-tool-path">test_upload.py</span></div>
+<div class="file-tool-fullpath">/Users/honglei/code/fastreader/backend/tests/test_upload.py</div>
+<div class="truncatable"><div class="truncatable-content">
+<div class="edit-section edit-old"><div class="edit-label">−</div><pre class="edit-content">    client = TestClient(app_env.app, raise_server_exceptions=False)
+    # note: plain TestClient (no context manager) so startup cleanup doesn&#39;t fail the job first
+    import httpx
+    resp = httpx.Client(transport=httpx.ASGITransport(app=app_env.app), base_url=&#34;http://t&#34;).delete(f&#34;/api/jobs/{job[&#39;id&#39;]}&#34;)
+    assert resp.status_code == 409</pre></div>
+<div class="edit-section edit-new"><div class="edit-label">+</div><pre class="edit-content">    # plain TestClient (no context manager) so startup cleanup doesn&#39;t fail the job first
+    client = TestClient(app_env.app)
+    assert client.delete(f&#34;/api/jobs/{job[&#39;id&#39;]}&#34;).status_code == 409</pre></div>
+</div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-07-23T22-35-19-621Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-07-23T22-35-19-621Z" class="timestamp-link"><time datetime="2026-07-23T22:35:19.621Z" data-timestamp="2026-07-23T22:35:19.621Z">2026-07-23T22:35:19.621Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /Users/honglei/code/fastreader/backend/tests/test_upload.py has been updated successfully. (note: the file had been modified on disk since you last read it — the edit applied cleanly, but the file contains other changes not in your context. Read it before edits that depend on surrounding content.)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-07-23T22-35-25-938Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-07-23T22-35-25-938Z" class="timestamp-link"><time datetime="2026-07-23T22:35:25.938Z" data-timestamp="2026-07-23T22:35:25.938Z">2026-07-23T22:35:25.938Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_018YtmiFALPTJFRfKsSMChvN">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Re-run backend suite</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">backend/.venv/bin/pytest backend/tests -q 2&gt;&amp;1 | tail -1</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-07-23T22-35-26-491Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-07-23T22-35-26-491Z" class="timestamp-link"><time datetime="2026-07-23T22:35:26.491Z" data-timestamp="2026-07-23T22:35:26.491Z">2026-07-23T22:35:26.491Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>27 passed, 27 warnings in 0.30s</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-07-23T22-35-30-682Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-07-23T22-35-30-682Z" class="timestamp-link"><time datetime="2026-07-23T22:35:30.682Z" data-timestamp="2026-07-23T22:35:30.682Z">2026-07-23T22:35:30.682Z</time></a></div><div class="message-content">
+<div class="thinking"><div class="thinking-label">Thinking</div></div></div></div>
+<div class="message assistant" id="msg-2026-07-23T22-35-32-564Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-07-23T22-35-32-564Z" class="timestamp-link"><time datetime="2026-07-23T22:35:32.564Z" data-timestamp="2026-07-23T22:35:32.564Z">2026-07-23T22:35:32.564Z</time></a></div><div class="message-content"><div class="file-tool edit-tool" data-tool-id="toolu_015HzpmjScad4NRzDVcXPBP4">
+<div class="file-tool-header edit-header"><span class="file-tool-icon">✏️</span> Edit <span class="file-tool-path">api.ts</span></div>
+<div class="file-tool-fullpath">/Users/honglei/code/fastreader/frontend/src/api.ts</div>
+<div class="truncatable"><div class="truncatable-content">
+<div class="edit-section edit-old"><div class="edit-label">−</div><pre class="edit-content">export async function fetchJobs(): Promise&lt;Job[]&gt; {</pre></div>
+<div class="edit-section edit-new"><div class="edit-label">+</div><pre class="edit-content">export async function deleteJob(id: string): Promise&lt;void&gt; {
+  await fetch(`/api/jobs/${id}`, { method: &#39;DELETE&#39; });
+}
+
+export async function fetchJobs(): Promise&lt;Job[]&gt; {</pre></div>
+</div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-07-23T22-35-32-642Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-07-23T22-35-32-642Z" class="timestamp-link"><time datetime="2026-07-23T22:35:32.642Z" data-timestamp="2026-07-23T22:35:32.642Z">2026-07-23T22:35:32.642Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /Users/honglei/code/fastreader/frontend/src/api.ts has been updated successfully. (file state is current in your context — no need to Read it back)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-07-23T22-35-34-455Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-07-23T22-35-34-455Z" class="timestamp-link"><time datetime="2026-07-23T22:35:34.455Z" data-timestamp="2026-07-23T22:35:34.455Z">2026-07-23T22:35:34.455Z</time></a></div><div class="message-content"><div class="file-tool edit-tool" data-tool-id="toolu_015nyJxz6gzQxBtGiscHUDuz">
+<div class="file-tool-header edit-header"><span class="file-tool-icon">✏️</span> Edit <span class="file-tool-path">Library.tsx</span></div>
+<div class="file-tool-fullpath">/Users/honglei/code/fastreader/frontend/src/components/Library.tsx</div>
+<div class="truncatable"><div class="truncatable-content">
+<div class="edit-section edit-old"><div class="edit-label">−</div><pre class="edit-content">import type { Job } from &#39;../api&#39;;
+import { fetchJobs } from &#39;../api&#39;;</pre></div>
+<div class="edit-section edit-new"><div class="edit-label">+</div><pre class="edit-content">import type { Job } from &#39;../api&#39;;
+import { deleteJob, fetchJobs } from &#39;../api&#39;;</pre></div>
+</div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-07-23T22-35-34-530Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-07-23T22-35-34-530Z" class="timestamp-link"><time datetime="2026-07-23T22:35:34.530Z" data-timestamp="2026-07-23T22:35:34.530Z">2026-07-23T22:35:34.530Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /Users/honglei/code/fastreader/frontend/src/components/Library.tsx has been updated successfully. (file state is current in your context — no need to Read it back)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-07-23T22-35-37-138Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-07-23T22-35-37-138Z" class="timestamp-link"><time datetime="2026-07-23T22:35:37.138Z" data-timestamp="2026-07-23T22:35:37.138Z">2026-07-23T22:35:37.138Z</time></a></div><div class="message-content"><div class="file-tool edit-tool" data-tool-id="toolu_011ymrn8kzPVgRsF5eXABDbj">
+<div class="file-tool-header edit-header"><span class="file-tool-icon">✏️</span> Edit <span class="file-tool-path">Library.tsx</span></div>
+<div class="file-tool-fullpath">/Users/honglei/code/fastreader/frontend/src/components/Library.tsx</div>
+<div class="truncatable"><div class="truncatable-content">
+<div class="edit-section edit-old"><div class="edit-label">−</div><pre class="edit-content">                &lt;button onClick={() =&gt; setDismissed(new Set([...dismissed, j.id]))}
+                  className=&#34;mt-3 text-[12px] text-[#8b8f9e] hover:text-[#d7d9e0] cursor-pointer&#34;&gt;Dismiss&lt;/button&gt;</pre></div>
+<div class="edit-section edit-new"><div class="edit-label">+</div><pre class="edit-content">                &lt;button
+                  onClick={() =&gt; {
+                    setDismissed(new Set([...dismissed, j.id]));
+                    deleteJob(j.id).then(poll).catch(() =&gt; {});
+                  }}
+                  className=&#34;mt-3 text-[12px] text-[#8b8f9e] hover:text-[#d7d9e0] cursor-pointer&#34;&gt;Dismiss&lt;/button&gt;</pre></div>
+</div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-07-23T22-35-37-214Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-07-23T22-35-37-214Z" class="timestamp-link"><time datetime="2026-07-23T22:35:37.214Z" data-timestamp="2026-07-23T22:35:37.214Z">2026-07-23T22:35:37.214Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /Users/honglei/code/fastreader/frontend/src/components/Library.tsx has been updated successfully. (file state is current in your context — no need to Read it back)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-07-23T22-35-47-039Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-07-23T22-35-47-039Z" class="timestamp-link"><time datetime="2026-07-23T22:35:47.039Z" data-timestamp="2026-07-23T22:35:47.039Z">2026-07-23T22:35:47.039Z</time></a></div><div class="message-content">
+<div class="thinking"><div class="thinking-label">Thinking</div></div></div></div>
+<div class="message assistant" id="msg-2026-07-23T22-35-47-056Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-07-23T22-35-47-056Z" class="timestamp-link"><time datetime="2026-07-23T22:35:47.056Z" data-timestamp="2026-07-23T22:35:47.056Z">2026-07-23T22:35:47.056Z</time></a></div><div class="message-content">
+<div class="thinking"><div class="thinking-label">Thinking</div></div></div></div>
+<div class="message assistant" id="msg-2026-07-23T22-35-49-749Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-07-23T22-35-49-749Z" class="timestamp-link"><time datetime="2026-07-23T22:35:49.749Z" data-timestamp="2026-07-23T22:35:49.749Z">2026-07-23T22:35:49.749Z</time></a></div><div class="message-content"><div class="file-tool edit-tool" data-tool-id="toolu_01M4SsU5qu2485L58Tpnxbz9">
+<div class="file-tool-header edit-header"><span class="file-tool-icon">✏️</span> Edit <span class="file-tool-path">Library.tsx</span></div>
+<div class="file-tool-fullpath">/Users/honglei/code/fastreader/frontend/src/components/Library.tsx</div>
+<div class="truncatable"><div class="truncatable-content">
+<div class="edit-section edit-old"><div class="edit-label">−</div><pre class="edit-content">  const docIds = new Set(docs.map((d) =&gt; d.id));
+  const visibleJobs = jobs.filter((j) =&gt;</pre></div>
+<div class="edit-section edit-new"><div class="edit-label">+</div><pre class="edit-content">  const docIds = new Set(docs.map((d) =&gt; d.id));
+
+  // A done job whose document is in the library has served its purpose — reap it.
+  useEffect(() =&gt; {
+    for (const j of jobs) {
+      if (j.status === &#39;done&#39; &amp;&amp; docIds.has(j.doc_id)) {
+        deleteJob(j.id).catch(() =&gt; {});
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [jobs, docs]);
+
+  const visibleJobs = jobs.filter((j) =&gt;</pre></div>
+</div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-07-23T22-35-49-813Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-07-23T22-35-49-813Z" class="timestamp-link"><time datetime="2026-07-23T22:35:49.813Z" data-timestamp="2026-07-23T22:35:49.813Z">2026-07-23T22:35:49.813Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /Users/honglei/code/fastreader/frontend/src/components/Library.tsx has been updated successfully. (file state is current in your context — no need to Read it back)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-07-23T22-35-57-342Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-07-23T22-35-57-342Z" class="timestamp-link"><time datetime="2026-07-23T22:35:57.342Z" data-timestamp="2026-07-23T22:35:57.342Z">2026-07-23T22:35:57.342Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01G6dTt6i3RPtoXJAPCP59PE">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Verify frontend, commit and push fix (auto-deploys)</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">cd frontend &amp;&amp; npx tsc --noEmit &amp;&amp; npm test 2&gt;&amp;1 | grep Tests &amp;&amp; npm run build 2&gt;&amp;1 | tail -1 &amp;&amp; cd .. &amp;&amp; git add backend frontend &amp;&amp; git commit -q -m &#34;fix: Dismiss deletes failed jobs server-side; reap completed job files
+
+Co-Authored-By: Claude Fable 5 &lt;noreply@anthropic.com&gt;&#34; &amp;&amp; git push 2&gt;&amp;1 | tail -1</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-07-23T22-36-00-378Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-07-23T22-36-00-378Z" class="timestamp-link"><time datetime="2026-07-23T22:36:00.378Z" data-timestamp="2026-07-23T22:36:00.378Z">2026-07-23T22:36:00.378Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>      Tests  6 passed (6)
+✓ built in 75ms
+   ef477ca..08e6dd7  main -&gt; main</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-07-23T22-36-07-757Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-07-23T22-36-07-757Z" class="timestamp-link"><time datetime="2026-07-23T22:36:07.757Z" data-timestamp="2026-07-23T22:36:07.757Z">2026-07-23T22:36:07.757Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01X76UBa6YosfbTF3Ga3Mz6X">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Wait for deploy, delete the stale failed job, list jobs</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">n=0; until [ $n -ge 50 ]; do code=$(curl -s -m 8 -o /dev/null -w &#34;%{http_code}&#34; -X DELETE https://fastreader-production.up.railway.app/api/jobs/91fcc495956c 2&gt;/dev/null); if [ &#34;$code&#34; = &#34;200&#34; ] || [ &#34;$code&#34; = &#34;404&#34; ]; then echo &#34;stale failed job deleted (HTTP $code)&#34;; break; fi; sleep 10; n=$((n+1)); done; curl -s -m 8 https://fastreader-production.up.railway.app/api/jobs</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-07-23T22-36-07-830Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-07-23T22-36-07-830Z" class="timestamp-link"><time datetime="2026-07-23T22:36:07.830Z" data-timestamp="2026-07-23T22:36:07.830Z">2026-07-23T22:36:07.830Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>Command running in background with ID: btbu9rhvg. Output is being written to: /private/tmp/claude-501/-Users-honglei-code-fastreader/d5b4f55f-1f3a-4d77-8177-80957b9ac53a/tasks/btbu9rhvg.output. You will be notified when it completes. To check interim output, use Read on that file path.</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-07-23T22-36-13-152Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-07-23T22-36-13-152Z" class="timestamp-link"><time datetime="2026-07-23T22:36:13.152Z" data-timestamp="2026-07-23T22:36:13.152Z">2026-07-23T22:36:13.152Z</time></a></div><div class="message-content">
+<div class="thinking"><div class="thinking-label">Thinking</div></div></div></div>
+<div class="message assistant" id="msg-2026-07-23T22-36-15-414Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-07-23T22-36-15-414Z" class="timestamp-link"><time datetime="2026-07-23T22:36:15.414Z" data-timestamp="2026-07-23T22:36:15.414Z">2026-07-23T22:36:15.414Z</time></a></div><div class="message-content"><div class="file-tool edit-tool" data-tool-id="toolu_01QS4YfqAgiWXE4FAwFFauiv">
+<div class="file-tool-header edit-header"><span class="file-tool-icon">✏️</span> Edit <span class="file-tool-path">fastreader-railway-deployment.md</span></div>
+<div class="file-tool-fullpath">/Users/honglei/.claude/projects/-Users-honglei-code-fastreader/memory/fastreader-railway-deployment.md</div>
+<div class="truncatable"><div class="truncatable-content">
+<div class="edit-section edit-old"><div class="edit-label">−</div><pre class="edit-content">- Public URL: https://fastreader-production.up.railway.app/</pre></div>
+<div class="edit-section edit-new"><div class="edit-label">+</div><pre class="edit-content">- Public URL: https://fastreader-production.up.railway.app/ — the user also attached the custom domain **https://fastreader.honglei.ai/** (set up by them, 2026-07-23)</pre></div>
+</div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-07-23T22-36-15-496Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-07-23T22-36-15-496Z" class="timestamp-link"><time datetime="2026-07-23T22:36:15.496Z" data-timestamp="2026-07-23T22:36:15.496Z">2026-07-23T22:36:15.496Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /Users/honglei/.claude/projects/-Users-honglei-code-fastreader/memory/fastreader-railway-deployment.md has been updated successfully.</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-07-23T22-36-22-941Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-07-23T22-36-22-941Z" class="timestamp-link"><time datetime="2026-07-23T22:36:22.941Z" data-timestamp="2026-07-23T22:36:22.941Z">2026-07-23T22:36:22.941Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>The fix is pushed and deploying. What changed:</p>
+<ul>
+<li><strong><code>DELETE /api/jobs/{id}</code></strong> on the backend (running jobs return 409 so you can't delete an active one) — 27 backend tests green.</li>
+<li><strong>Dismiss now deletes the job server-side</strong>, so the card stays gone across reloads and for every visitor — not just in your tab's memory.</li>
+<li><strong>Completed job files get reaped automatically</strong> once their document shows in the library, so the volume doesn't accumulate stale job JSONs.</li>
+<li>A background task is waiting for the deploy and will then delete that specific haunted Yellow Wallpaper job (<code>91fcc495956c</code>) via the new endpoint, so your library at fastreader.honglei.ai will be clean without you touching anything.</li>
+</ul>
+<p>I'll confirm once the stale card is verifiably gone from production.</p></div></div></div>
+<div class="message user" id="msg-2026-07-23T22-36-38-319Z"><div class="message-header"><span class="role-label">User</span><a href="#msg-2026-07-23T22-36-38-319Z" class="timestamp-link"><time datetime="2026-07-23T22:36:38.319Z" data-timestamp="2026-07-23T22:36:38.319Z">2026-07-23T22:36:38.319Z</time></a></div><div class="message-content">
+<div class="user-content"><p><task-notification>
+<task-id>btbu9rhvg</task-id>
+<tool-use-id>toolu_01X76UBa6YosfbTF3Ga3Mz6X</tool-use-id>
+<output-file>/private/tmp/claude-501/-Users-honglei-code-fastreader/d5b4f55f-1f3a-4d77-8177-80957b9ac53a/tasks/btbu9rhvg.output</output-file>
+<status>completed</status></p>
+<summary>Background command "Wait for deploy, delete the stale failed job, list jobs" completed (exit code 0)</summary>
+<p></task-notification></p></div></div></div>
+<div class="message assistant" id="msg-2026-07-23T22-36-45-869Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-07-23T22-36-45-869Z" class="timestamp-link"><time datetime="2026-07-23T22:36:45.869Z" data-timestamp="2026-07-23T22:36:45.869Z">2026-07-23T22:36:45.869Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01H45hQKyQp5dKZ25oy2PwDj">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Confirm stale job gone on production and custom domain</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">cat /private/tmp/claude-501/-Users-honglei-code-fastreader/d5b4f55f-1f3a-4d77-8177-80957b9ac53a/tasks/btbu9rhvg.output; echo; curl -s -m 8 https://fastreader.honglei.ai/api/jobs 2&gt;/dev/null || echo &#34;(custom domain: checking via railway domain instead)&#34;; curl -s -m 8 https://fastreader-production.up.railway.app/api/documents | python3 -c &#34;import json,sys; print(&#39;docs:&#39;, [d[&#39;id&#39;] for d in json.load(sys.stdin)])&#34;</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-07-23T22-36-46-236Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-07-23T22-36-46-236Z" class="timestamp-link"><time datetime="2026-07-23T22:36:46.236Z" data-timestamp="2026-07-23T22:36:46.236Z">2026-07-23T22:36:46.236Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>stale failed job deleted (HTTP 200)
+[{&quot;id&quot;:&quot;6bf191a529e3&quot;,&quot;doc_id&quot;:&quot;the-yellow-wallpaper-f4a3c6&quot;,&quot;title&quot;:&quot;The Yellow Wallpaper&quot;,&quot;status&quot;:&quot;done&quot;,&quot;detail&quot;:&quot;document ready&quot;,&quot;error&quot;:null,&quot;created_at&quot;:1784845755.7540834}]
+[{&quot;id&quot;:&quot;6bf191a529e3&quot;,&quot;doc_id&quot;:&quot;the-yellow-wallpaper-f4a3c6&quot;,&quot;title&quot;:&quot;The Yellow Wallpaper&quot;,&quot;status&quot;:&quot;done&quot;,&quot;detail&quot;:&quot;document ready&quot;,&quot;error&quot;:null,&quot;created_at&quot;:1784845755.7540834}]docs: [&#x27;alice-in-wonderland&#x27;, &#x27;attention-is-all-you-need&#x27;, &#x27;the-yellow-wallpaper-f4a3c6&#x27;]</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-07-23T22-36-53-117Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-07-23T22-36-53-117Z" class="timestamp-link"><time datetime="2026-07-23T22:36:53.117Z" data-timestamp="2026-07-23T22:36:53.117Z">2026-07-23T22:36:53.117Z</time></a></div><div class="message-content">
+<div class="thinking"><div class="thinking-label">Thinking</div></div></div></div>
+<div class="message assistant" id="msg-2026-07-23T22-36-53-130Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-07-23T22-36-53-130Z" class="timestamp-link"><time datetime="2026-07-23T22:36:53.130Z" data-timestamp="2026-07-23T22:36:53.130Z">2026-07-23T22:36:53.130Z</time></a></div><div class="message-content">
+<div class="thinking"><div class="thinking-label">Thinking</div></div></div></div>
+<div class="message assistant" id="msg-2026-07-23T22-36-56-314Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-07-23T22-36-56-314Z" class="timestamp-link"><time datetime="2026-07-23T22:36:56.314Z" data-timestamp="2026-07-23T22:36:56.314Z">2026-07-23T22:36:56.314Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01TUrviipMGiTm1R7kdGgDJB">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Clean last job file, screenshot the custom domain</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">curl -s -m 8 -X DELETE https://fastreader-production.up.railway.app/api/jobs/6bf191a529e3 -o /dev/null -w &#34;done-job delete: %{http_code}\n&#34;; curl -s -m 8 https://fastreader-production.up.railway.app/api/jobs; echo; orca goto --url &#34;https://fastreader.honglei.ai/&#34; --json 2&gt;&amp;1 | grep -o &#39;&#34;ok&#34;&#39; | head -1; sleep 2.5; orca screenshot --json 2&gt;/dev/null | python3 -c &#34;
+import json, sys, base64
+d = json.load(sys.stdin)
+open(&#39;/private/tmp/claude-501/-Users-honglei-code-fastreader/d5b4f55f-1f3a-4d77-8177-80957b9ac53a/scratchpad/custom_domain.png&#39;,&#39;wb&#39;).write(base64.b64decode(d[&#39;result&#39;][&#39;data&#39;]))
+print(&#39;shot&#39;)&#34;</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-07-23T22-37-00-154Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-07-23T22-37-00-154Z" class="timestamp-link"><time datetime="2026-07-23T22:37:00.154Z" data-timestamp="2026-07-23T22:37:00.154Z">2026-07-23T22:37:00.154Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>done-job delete: 200
+[]
+&quot;ok&quot;
+shot</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-07-23T22-37-04-219Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-07-23T22-37-04-219Z" class="timestamp-link"><time datetime="2026-07-23T22:37:04.219Z" data-timestamp="2026-07-23T22:37:04.219Z">2026-07-23T22:37:04.219Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01XfDjxNYnXtC56BShcwCMHm"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/private/tmp/claude-501/-Users-honglei-code-fastreader/d5b4f55f-1f3a-4d77-8177-80957b9ac53a/scratchpad/custom_domain.png&#34;
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-07-23T22-37-04-271Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-07-23T22-37-04-271Z" class="timestamp-link"><time datetime="2026-07-23T22:37:04.271Z" data-timestamp="2026-07-23T22:37:04.271Z">2026-07-23T22:37:04.271Z</time></a></div><div class="message-content"><div class="tool-result">
+<div class="image-block"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABHcAAANZCAIAAAAKzEWEAAABFGlDQ1BfAAB4nJWQsUoDQRCGPzUQBEELCwuLK8ROvcglGrDQRAm2iUK0u1yOQ0wux+VESzsbH8KHEMTexloQ7HwEq9T+e1dsQFI4y+x8/DPszgzMY6zkwjDO0nar4XQvLp3yN3M6ufnBOGG2qWryWdR+bPF/W+yH40DxR56l+lxP9sWrUcF3hnsFPxq+zZJM/GQ4PWs3xc/ilWiKe1McJKmpfxMfDAc3ge2bpTA+7yh25eu0GOlEDAjZocM1V/iiI1z5MU1OdFfxqCjWcm1fuQZ15dzc96R5OXnKV1Xlmn0WX47eoV6GhXur9Tx4OYS1B6ttfMHyq/RNq9kdJ37q2+1PSjNmcv7M5HBKTMC2aFcdVqj9AiD0RlhoQYS/AAAQAElEQVR4nOzdBXwURxsG8I27uwARCJZASEgI7u5OKZTSQgt1++ruTr0F2kKLtRR3dwhOcIsQAglEiLt9z93Actwll1xyKYE+/19K93b31m5vdt55d+eM7eydJSIiIiIiItITQ4mIiIiIiIj0h1EWERERERGRPjHKIiIiIiIi0idGWURERERERPrEKIuIiIiIiEifGGURERERERHpE6MsIiIiIiIifWKURUREREREpE+MsoiIiIiIiPSJURYREREREZE+McoiIiIiIiLSJ0ZZRERERERE+sQoi4iIiIiISJ8YZREREREREekToywiIiIiIiJ9YpRFRERERESkT4yyiIiIiIiI9IlRFhERERERkT4xyiIiIiIiItInRllERERERET6xCiLiIiIiIhInxhlERERERER6ROjLCIiIiIiIn1ilEVERERERKRPjLKIiIiIiIj0iVEWERERERGRPjHKIiIiIiIi0idGWURERERERPrEKIuIiIiIiEifGGURERERERHpE6MsIiIiIiIifWKURUREREREpE+MsoiIiIiIiPSJURYREREREZE+McoiIiIiIiLSJ0ZZRERERERE+sQoi4iIiIiISJ8YZREREREREekToywiIiIiIiJ9YpRFRERERESkT4yyiIiIiIiI9IlRFhERERERkT4xyiIiIiIiItInRllERERERET6xCiLiIiIiIhInxhlERERERER6ROjLCIiIiIiIn1ilEVERERERKRPjLKIiIiIiIj0iVEWERERERGRPjHKIiIiIiIi0idGWURERERERPrEKIuIiIiIiEifGGURERERERHpE6MsIiIiIiIifWKURUREREREpE+MsoiIiIiIiPSJURYREREREZE+McoiIiIiIiLSJ0ZZRERERERE+sQoi4iIiIiISJ8YZREREREREekToywiIiIiIiJ9YpRFRERERESkT4yyiIiIiIiI9IlRFhERERERkT4xyiIiIiIiItInRllERERERET6xCiLiIiIiIhInxhlERERERER6ZOxRKS7Z597wcPDo8rZSkvL3nn7jZKSEulu0LKROTm5168lHTx44PjxKKk+6d27T89evcXw3j17Vq9eKRERERHRvYZRFtXEoEFDzMzNqjOnmbl5SU6OdDdUuZETJz1ckF/wzjtvRu7bK9UPffr2axfRXgzb2NgyyiIiIiK6F/GOQbq3rV23cfOWHeKvSUCApCNzC/PPPvty4KDBEhERERGRnjCXRXWsvFyqS0j4SAY3h+1s7bTNKm+IwZ3jDaRXXn3dzNRs2bIlEhERERFRrTHKotpav27tH3PnVDiprLwsNzdXqgcWLVzw808/iGFTU9NWrVo/+9wLjXx85BkenfoYoywiIiIi0gtGWVRbGRkZiYlXqz+/jY1NYFCruLjYa0lJVc5sZWUV1Kp1QsLlq1euSHpSVFR0+PChiRMe+OPPBb5+fvJWeXp6ae4INsDfv7GllVVcbMz169erXLiJiQk2ODcn5/z5c1XO7OLi0rhJwPVrSbGxsVK1eXl7+/r6paWmxsREY1+q8xbsmq+v78lTJ7MyMyUiIiIiqmOMsuhf0qlzl6eeftbF2cXE1ESMKS0tTb9xY+nSJQvm/6k2c9Omzd5+5z03N3dTM1PVmVetWjl3zm94icjn19/nKiao3P739YzvSstKMTBoQN/q5NB+/OH7L7+eIb9sEhAgR1mGhoaPT3ti6NDhllaW8gzlZeVHjxz+7PNPNONDhDEffPixt3cDC0uLW3NLmZmZR48efu/dt8vKytTmf+aZ54cMHSbvHWZG4PfWm69JlWvevAXyby1atFTd5fQb6fPn//nP4r/kMc89/+LQYcPF8PGoKGQapz/xlKOTI16uWb3q888+kYiIiIiojrH3C/o3vPjSyx9/8pmnp6ccYoGRkZGzi8vj06Z/+eUMRDXy+IcnPzr71zkNGja8HYTcmvmRR6d8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LUes8K6mF7SUNppKFCruRUNL7xrVia+Eyg4F1lqzH5awsLBo3qI10k1XEuKRUlN2ilh2WuPXCCXl7xcjrYSmnJ3bN1a0pPIKQyxJ645XSWt8dXO9WnZc8WFUUpBWeJIzxCKiGmCURVSxsHadHB1dYmMuoDVXIt01CWjeomVwenrasiXzJCK6p2xcvzIvL695i1ZNmwWi/evatasb1y2vMJ6P6NCttLQkct+OKn83opZKy0oRAtWsMYKI6N/HOwaJiIiIiIj0ib1fEBERERER6ROjLCIiIiIiIn1ilEVERERERKRPjLKIiIiIiIj0iVEWERERERGRPjHKIiIiIiIi0idGWURERERERPrEKIuIiIiIiEifGGURERERERHpE6MsIiIiIiIifWKURUREREREpE+MsoiIiIiIiPSJURYREREREZE+McoiIiIiIiLSJ0ZZRERERERE+sQoi4iIiIiISJ8YZREREREREekToywiIiIiIiJ9YpRFRERERESkT4yyiIiIiIiI9IlRFhERERERkT4xyiIiIiIiItInRllERERERET6xCiLiIiIiIhInxhlERERERER6ROjLCIiIiIiIn1ilEVERERERKRPjLKIiIiIiIj0iVEWERERERGRPjHKIiIiIiIi0idGWURERERERPrEKIuIiIiIiEifGGURERERERHpE6MsIiIiIiIifWKURUREREREpE+MsoiIiIiIiPSJURYREREREZE+McoiIiIiIiLSJ0ZZRERERERE+sQoi4iIiIiISJ8YZREREREREekToywiIiIiIiJ9MpaI9MHI0MjE1MzE2MTQ0NjQkNE7EVWsTKGkuKS4uKiwtKxUqnssnYioOv790onubwZ29s4SUS2gBmNubmViYoJiqVSpvLxMIiKqiIGBoZGSiYlpcXFxQUFu3dVmWDoRUfX9m6UT/RcwyqJaMTM1t7S0KSzMLyoqlIiIdGFqamZmZpGXl11YVCDpG0snIqqxOi2d6D8C7XyWElGN4OQxM7VAY09JSbFERKQjZXqp2MzM0sDQQL/FCEsnIqqNuiud6L+DURbVENqJUYnJz88tK+MdOERUQ+Xl5SUlJeZmuBKVl5aWSPrA0omIaq8uSif6T+FzwFQTRoZGyltx8viQAxHVEooRFCYoUlCwSLXG0omI9EW/pRP91zCXRTVhaWGDBDpz6ESkF2gz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pLIAAAAiqSwAAIBIKgsAACCSygIAAIiksgAAACKpLAAAgEgqCwAAIJLKAgAAiKSyAAAAIqksAACASCoLAAAgksoCAACIpLIAAAAiqSwAAIBIKgsAACCSygIAAIiksgAAACKpLAAAgEgqCwAAIJLKAgAAiKSyAAAAIqksAACASCoLAAAgksoCAACIpLIAAAAiqSwAAIBIKgsAACCSygIAAIiksgAAACKpLAAAgEgqCwAAIJLKAgAAiKSyAAAAIqksAACASCoLAAAgksoCAACIpLIAAAAiqSwAAIBIKgsAACCSygIAAIiksgAAACKpLAAAgEgqCwAAIJLKAgAAiKSyAAAAIqksAACASCoLAAAgksoCAACIpLIAAAAiqSwAAIBIKgsAACCSygIAAIiksgAAACKpLAAAgEgqCwAAIJLKAgAAiKSyAAAAIqksAACASCoLAAAgksoCAACIpLIAAAAiqSwAAIBIKgsAACCSygIAAIiksgAAACKpLAAAgEgqCwAAIJLKAgAAiKSyAAAAIqksAACASCoLAAAgksoCAACIpLIAAAAiqSwAAIBIKgsAACCSygIAAIiksgAAACKpLAAAgEgqCwAAIJLKAgAAiKSyAAAAIqksAACASCoLAAAgksoCAACIpLIAAAAiqSwAAIBIKgsAACCSygIAAIiksgAAACKpLAAAgEgqCwAAIJLKAgAAiKSyAAAAIqksAACASCoLAAAgksoCAACIpLIAAAAiqSwAAIBIKgsAACCSygIAAIiksgAAACKpLAAAgEgqCwAAIJLKAgAAiKSyAAAAIqksAACASCoLAAAgksoCAACIpLIAAAAiqSwAAIBIKgsAACCSygIAAIiksgAAACKpLAAAgEgqCwAAIJLKAgAAiKSyAAAAIqksAACASCoLAAAgksoCAACIpLIAAAAiqSwAAIBIKgsAACCSygIAAIiksgAAACKpLAAAgEgqCwAAIJLKAgAAiKSyAAAAIqksAACASCoLAAAgksoCAACIpLIAAAAiqSwAAIBIKgsAACCSygIAAIiksgAAACKpLAAAgEgqCwAAIJLKAgAAiKSyAAAAIqksAACASCoLAAAgksoCAACIpLIAAAAiqSwAAIBIKgsAACCSygIAAIiksgAAACKpLAAAgEgqCwAAIJLKAgAAiKSyAAAAIqksAACASCoLAAAgksoCAACIpLIAAAAiqSwAAIBIKgsAACCSygIAAIiksgAAACKpLAAAgEgqCwAAIJLKAgAAiKSyAAAAIqksAACASCoLAAAgksoCAACIpLIAAAAiqSwAAIBIKgsAACCSygIAAIiksgAAACKpLAAAgEgqCwAAIJLKAgAAiKSyAAAAIqksAACASCoLAAAgksoCAACIpLIAAAAiqSwAAIBIKgsAACCSygIAAIiksgAAACKpLAAAgEgqCwAAIJLKAgAAiKSyAAAAIqksAACASCoLAAAgksoCAACIpLIAAAAiqSwAAIBIKgsAACCSygIAAIiksgAAACKpLAAAgEgqCwAAIJLKAgAAiKSyAAAAIqksAACASCoLAAAgksoCAACIpLIAAAAiqSwAAIBIKgsAACCSygIAAIiksgAAACKpLAAAgEgqCwAAIJLKAgAAiKSyAAAAIqksAACASCoLAAAgksoCAACIpLIAAAAiqSwAAIBIKgsAACCSygIAAIiksgAAACKpLAAAgEgqCwAAIJLKAgAAiKSyAAAAIqksAACASCoLAAAgksoCAACIpLIAAAAiqSwAAIBIKgsAACCSygIAAIiksgAAACKpLAAAgEgqCwAAIJLKAgAAiKSyAAAAIqksAACASCoLAAAgksoCAACIpLIAAAAiqSwAAIBIKgsAACCSygIAAIiksgAAACKpLAAAgEgqCwAAIJLKAgAAiKSyAAAAIqksAACASCoLAAAgksoCAACIpLIAAAAiqSwAAIBIKgsAACCSygIAAIiksgAAACKpLAAAgEgqCwAAIJLKAgAAiKSyAAAAIqksAACASCoLAAAgksoCAACIpLIAAAAiqSwAAIBIKgsAACCSygIAAIiksgAAACKpLAAAgEgqCwAAIJLKAgAAiKSyAAAAIqksAACASCoLAAAgksoCAACIpLIAAAAiqSwAAIBIKgsAACCSygIAAIiksgAAACKpLAAAgEgqCwAAIJLKAgAAiKSyAAAAIqksAACASCoLAAAgksoCAACIpLIAAAAiqSwAAIBIKgsAACCSygIAAIiksgAAACKpLAAAgEgqCwAAIJLKAgAAiKSyAAAAIqksAACASCoLAAAgksoCAACIpLIAAAAiqSwAAIBIKgsAACCSygIAAIiksgAAACKpLAAAgEgqCwAAIJLKAgAAiKSyAAAAIqksAACASCoLAAAgksoCAACIpLIAAAAiqSwAAIBIKgsAACCSygIAAIiksgAAACKpLAAAgEgqCwAAIJLKAgAAiKSyAAAAIv0fAAAA//+VeRd1AAAABklEQVQDAGk+x17W0SYHAAAAAElFTkSuQmCC" style="max-width: 100%"></div></div></div></div>
+<div class="message assistant" id="msg-2026-07-23T22-37-13-491Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-07-23T22-37-13-491Z" class="timestamp-link"><time datetime="2026-07-23T22:37:13.491Z" data-timestamp="2026-07-23T22:37:13.491Z">2026-07-23T22:37:13.491Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p><strong>Fixed and verified on fastreader.honglei.ai</strong> — the library is clean: three book/paper cards, the add-document card, no ghost failure cards, and <code>/api/jobs</code> returns an empty list.</p>
+<p>What the fix does going forward:</p>
+<ul>
+<li><strong>Dismiss now deletes the job on the server</strong> (<code>DELETE /api/jobs/{id}</code>), so a dismissed failure stays gone across reloads, devices, and visitors — it was previously just in-memory React state.</li>
+<li><strong>Completed jobs self-clean</strong>: once a processed document appears in the library, its job file is reaped automatically.</li>
+<li>Running jobs are protected from deletion (409), and everything is covered by tests (27 backend, all green).</li>
+</ul>
+<p>I also cleaned up the two leftover job records from today's testing directly, which is why your library is already pristine without you needing to reload-and-dismiss anything. The custom domain is noted in my memory for future sessions, and <code>origin/main</code> still had no commits from your UI worktrees when I pushed — I'll keep merging from main before every push.</p></div></div></div>
+<div class="message user" id="msg-2026-07-23T22-38-59-576Z"><div class="message-header"><span class="role-label">User</span><a href="#msg-2026-07-23T22-38-59-576Z" class="timestamp-link"><time datetime="2026-07-23T22:38:59.576Z" data-timestamp="2026-07-23T22:38:59.576Z">2026-07-23T22:38:59.576Z</time></a></div><div class="message-content">
+<div class="user-content"><p>push to main</p></div></div></div>
+<div class="message assistant" id="msg-2026-07-23T22-39-05-813Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-07-23T22-39-05-813Z" class="timestamp-link"><time datetime="2026-07-23T22:39:05.813Z" data-timestamp="2026-07-23T22:39:05.813Z">2026-07-23T22:39:05.813Z</time></a></div><div class="message-content">
+<div class="thinking"><div class="thinking-label">Thinking</div></div></div></div>
+<div class="message assistant" id="msg-2026-07-23T22-39-06-785Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-07-23T22-39-06-785Z" class="timestamp-link"><time datetime="2026-07-23T22:39:06.785Z" data-timestamp="2026-07-23T22:39:06.785Z">2026-07-23T22:39:06.785Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01Pa3cTq9zC3p1mmpQBK4sjv">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Check for unpushed or uncommitted work</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">git status -sb; git log --oneline origin/main..HEAD 2&gt;/dev/null | head -5</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-07-23T22-39-06-912Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-07-23T22-39-06-912Z" class="timestamp-link"><time datetime="2026-07-23T22:39:06.912Z" data-timestamp="2026-07-23T22:39:06.912Z">2026-07-23T22:39:06.912Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>## main...origin/main</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-07-23T22-39-12-109Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-07-23T22-39-12-109Z" class="timestamp-link"><time datetime="2026-07-23T22:39:12.109Z" data-timestamp="2026-07-23T22:39:12.109Z">2026-07-23T22:39:12.109Z</time></a></div><div class="message-content">
+<div class="thinking"><div class="thinking-label">Thinking</div></div></div></div>
+<div class="message assistant" id="msg-2026-07-23T22-39-12-744Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-07-23T22-39-12-744Z" class="timestamp-link"><time datetime="2026-07-23T22:39:12.744Z" data-timestamp="2026-07-23T22:39:12.744Z">2026-07-23T22:39:12.744Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_012VSedWDXewdGrKKZyC56n9">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Fetch and confirm main is fully synced</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">git fetch origin &amp;&amp; git status -sb &amp;&amp; git log --oneline -3</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-07-23T22-39-13-278Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-07-23T22-39-13-278Z" class="timestamp-link"><time datetime="2026-07-23T22:39:13.278Z" data-timestamp="2026-07-23T22:39:13.278Z">2026-07-23T22:39:13.278Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>## main...origin/main
+08e6dd7 fix: Dismiss deletes failed jobs server-side; reap completed job files
+ef477ca fix: fail orphaned processing jobs on startup (container restarts)
+fbd8166 feat: phase 2 container support — slim image, sandbox flag, clear pipeline errors</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-07-23T22-39-19-166Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-07-23T22-39-19-166Z" class="timestamp-link"><time datetime="2026-07-23T22:39:19.166Z" data-timestamp="2026-07-23T22:39:19.166Z">2026-07-23T22:39:19.166Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Everything is already on <code>origin/main</code> — the working tree is clean and local <code>main</code> is exactly level with the remote (latest commit <code>08e6dd7</code>, the dismiss/reap fix, which is also what's deployed). There was nothing left to push.</p>
+<p>If you were expecting something else to land (e.g. changes from one of your UI worktrees), those haven't reached <code>origin/main</code> yet — they'd need to be pushed/merged from their own branch first, and I'm happy to help integrate them if you point me at the branch.</p></div></div></div>
+<div class="message user" id="msg-2026-07-23T22-48-02-656Z"><div class="message-header"><span class="role-label">User</span><a href="#msg-2026-07-23T22-48-02-656Z" class="timestamp-link"><time datetime="2026-07-23T22:48:02.656Z" data-timestamp="2026-07-23T22:48:02.656Z">2026-07-23T22:48:02.656Z</time></a></div><div class="message-content">
+<div class="user-content"><p>now let's write the readme file, it should contain sections such as what is FastReader, how to use it, what makes FastReader interesting or or non-obvious, the architecture (i'll attach an excalidraw digram for this later), Key design decisions and tradeoffs</p></div></div></div>
+<div class="message assistant" id="msg-2026-07-23T22-48-31-784Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-07-23T22-48-31-784Z" class="timestamp-link"><time datetime="2026-07-23T22:48:31.784Z" data-timestamp="2026-07-23T22:48:31.784Z">2026-07-23T22:48:31.784Z</time></a></div><div class="message-content">
+<div class="thinking"><div class="thinking-label">Thinking</div></div></div></div>
+<div class="message assistant" id="msg-2026-07-23T22-48-32-720Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-07-23T22-48-32-720Z" class="timestamp-link"><time datetime="2026-07-23T22:48:32.720Z" data-timestamp="2026-07-23T22:48:32.720Z">2026-07-23T22:48:32.720Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Good time for it — the repo's story is worth telling properly. Writing the full README now:</p></div></div></div>
+<div class="message assistant" id="msg-2026-07-23T22-49-21-089Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-07-23T22-49-21-089Z" class="timestamp-link"><time datetime="2026-07-23T22:49:21.089Z" data-timestamp="2026-07-23T22:49:21.089Z">2026-07-23T22:49:21.089Z</time></a></div><div class="message-content"><div class="file-tool write-tool" data-tool-id="toolu_01Q7FrCaQjoGrhTwsfrFfyHG">
+<div class="file-tool-header write-header"><span class="file-tool-icon">📝</span> Write <span class="file-tool-path">README.md</span></div>
+<div class="file-tool-fullpath">/Users/honglei/code/fastreader/README.md</div>
+<div class="truncatable"><div class="truncatable-content"><pre class="file-content"># FastReader
+
+**Read long documents the way Google Maps reads the world.**
+Live at [fastreader.honglei.ai](https://fastreader.honglei.ai/)
+
+## What is FastReader
+
+Long documents force a bad choice: read a summary (fast, but shallow — and when you
+want to dig in, it abandons you) or read the whole thing (deep, but hours). FastReader
+removes the choice by treating a document like a map: a stack of zoom levels you move
+between freely, where **the passage you&#39;re reading stays anchored in place while the
+document changes resolution around it** — the way the point under your cursor never
+moves when you zoom a map.
+
+Every document becomes a pyramid of **true rewrites**: a one-paragraph gist at the top,
+a narrative overview below it, chapter- or section-depth levels under that, down to the
+verbatim full text. Each level reads as one continuous document at that depth — flowing
+prose, not bullet points, not chunk-by-chunk summaries. You can read the whole book in
+25 seconds, or 3 minutes, or 26 minutes, or in full — and switch between those readings
+mid-sentence without losing your place.
+
+## How to use it
+
+### Reading
+
+Open a document. It starts at the gist — the entire document as a single paragraph. The
+**altitude dial** on the right edge shows every level with its name and word count; it
+fades to a slim pill while you read and returns when you move the mouse.
+
+| Input | What it does |
+|---|---|
+| Scroll / two-finger swipe | Read within the current level (never hijacked) |
+| Pinch, or any modifier key + scroll | Zoom — the paragraph under your pointer stays put |
+| Double-click a paragraph | Dive into it (shift + double-click to rise) |
+| `+` / `-` keys | Zoom from the center of the screen |
+| Scroll over the dial, click or drag a stop | Jump levels directly |
+
+Zooming in lands you *proportionally*: if you were 70% of the way through a chapter&#39;s
+one-paragraph rendition, you land 70% of the way through its expanded scenes. Repeated
+dives feel like falling continuously toward the sentence you were reading. A brief gold
+pulse marks where your eyes should land after each jump.
+
+### Adding your own documents
+
+Click **Add a document**, paste text or load a `.txt`/`.md` file, and give it a title.
+A rewrite agent (Claude Sonnet via the [Claude Agent SDK](https://code.claude.com/docs/en/agent-sdk))
+reads the document, plans how many levels it deserves, writes every level, and keeps
+revising until the result passes the alignment validator. A processing card shows live
+status; expect a few minutes for longer documents. When it finishes, the document
+appears in the library with level names the agent invented for it — *The Yellow
+Wallpaper* came out as *In one breath → The nursery upstairs → Behind the pattern →
+Every word*.
+
+### Running locally
+
+```bash
+# backend (serves the API and, in production, the built frontend)
+python3 -m venv backend/.venv
+backend/.venv/bin/pip install -r backend/requirements.txt -r backend/requirements-dev.txt
+BUILTIN_DIR=data/builtin backend/.venv/bin/uvicorn app.main:app --app-dir backend --port 8000
+
+# frontend dev server (proxies /api to :8000)
+cd frontend &amp;&amp; npm install &amp;&amp; npm run dev
+```
+
+Tests: `backend/.venv/bin/pytest backend/tests` · `cd frontend &amp;&amp; npm test`
+
+Uploads work locally without an API key if you&#39;re logged into Claude Code (the Agent
+SDK rides its auth); deployed environments need `ANTHROPIC_API_KEY`.
+
+## What makes FastReader interesting
+
+**Levels are rewrites, not summaries.** Most &#34;summarize at three lengths&#34; tools produce
+disconnected chunk summaries. FastReader&#39;s quality bar is that every level *reads as one
+document* — present-tense continuous prose you could hand someone as &#34;the 3-minute
+edition.&#34; The zoom feels like changing altitude over the same terrain, not switching
+between different artifacts.
+
+**The alignment pyramid is what makes anchoring honest.** Every segment at level *N*
+carries a `span: [first, lastExclusive)` into level *N+1*, and the spans of a level must
+exactly tile the level below — no gaps, no overlaps, machine-checked. Anchoring is then
+just arithmetic: zoom out walks to the parent, zoom in picks a child proportionally.
+The invariant is strong enough that a zoom-in → zoom-out round trip returns you to the
+*exact same scroll position*.
+
+**The rewrite agent is gated by a validator, not by vibes.** The agent&#39;s only way to
+finish is a `submit_rewrites` tool that runs the assembler and the span validator;
+errors bounce straight back into its loop until the document is provably well-formed.
+Creative output, mechanically verified — the same invariants that guarded the
+hand-written phase-1 documents now guard every user upload.
+
+**Levels are per-document, in count and in name.** A 6k-word story gets 4 levels, a
+novel gets 5 or 6, and the level names are part of the rewrite itself — the dial reads
+like it belongs to *this* document, not like generic UI chrome.
+
+**Zoom is instant because the whole pyramid ships at once.** One ~300KB JSON fetch per
+document; every zoom afterwards is pure client-side math and a 300ms crossfade. No
+spinners inside the reading experience, ever.
+
+**Plain scroll is sacred.** Reading input is never hijacked; zoom lives on pinch, *any*
+modifier + scroll (whichever you reach for works), double-click, keys, and the dial.
+
+## Architecture
+
+&lt;!-- TODO: excalidraw diagram goes here --&gt;
+
+```
+Browser SPA (Vite + React + TS + Tailwind)
+  Library · Reader = LevelView + AltitudeDial + ZoomController
+  — whole document fetched once; all zooming is client-side —
+        │  GET /api/documents · GET /api/documents/{id}
+        │  POST /api/upload · GET/DELETE /api/jobs/{id}
+        ▼
+FastAPI backend
+  ├── DocumentStore — merges data/builtin/ (shipped in the image)
+  │                   with $DATA_DIR/documents/ (Railway volume)
+  ├── JobStore — one JSON status file per processing job
+  └── background task → scripts/pipeline.py
+        └── Claude Agent SDK (Sonnet) with two in-process tools:
+            get_source (numbered paragraphs + level plan)
+            submit_rewrites (assemble + validate; errors retry the loop)
+```
+
+The document format (one self-contained JSON per document, no database):
+
+```jsonc
+{
+  &#34;id&#34;: &#34;the-yellow-wallpaper-f4a3c6&#34;,
+  &#34;title&#34;: &#34;The Yellow Wallpaper&#34;,
+  &#34;kind&#34;: &#34;book&#34;,                      // serif rendering; &#34;paper&#34; renders sans
+  &#34;levels&#34;: [                          // dynamic count — 3 to 6
+    { &#34;name&#34;: &#34;In one breath&#34;, &#34;words&#34;: 106 },
+    { &#34;name&#34;: &#34;Behind the pattern&#34;, &#34;words&#34;: 2282 }
+    // ...
+  ],
+  &#34;segments&#34;: [                        // segments[level][i], reading order
+    [ { &#34;text&#34;: &#34;…&#34;, &#34;span&#34;: [0, 6] } ],          // spans index the next level down
+    [ { &#34;text&#34;: &#34;…&#34;, &#34;heading&#34;: &#34;II&#34;, &#34;span&#34;: [3, 6] } ],
+    [ { &#34;text&#34;: &#34;…&#34; } ]                            // last level: verbatim, no spans
+  ]
+}
+```
+
+`scripts/validate_data.py` enforces the invariants (spans in bounds, contiguous, exactly
+tiling the next level; single gist segment; level/segment parity). The assembler
+(`scripts/assemble.py`) turns agent- or hand-written rewrites plus the chunked source
+into this shape, and refuses anything invalid.
+
+## Key design decisions and tradeoffs
+
+**Whole-document fetch over lazy level loading.** ~300KB (≈100KB gzipped) buys
+zero-latency zoom, which is the product&#39;s soul. Revisit only when documents get ~10×
+bigger.
+
+**Discrete levels with a 300ms &#34;altitude jump,&#34; not continuous scaling.** True
+Maps-style continuous zoom would mean rendering two levels at intermediate scales —
+beautiful, and an afternoon of work by itself. The directional crossfade (outgoing level
+scales *toward* you when diving, *away* when rising) plus the landing pulse fake most of
+the feel at a fraction of the cost.
+
+**Files, not a database.** Built-ins are committed JSON shipped in the image; uploads
+live on a Railway volume; job status is one JSON file per job. A database earns its
+place only with accounts or multiple replicas — the `DocumentStore` seam is where it
+would slot in.
+
+**One agent run writes the whole pyramid.** The alternative — one API call per level —
+is cheaper to retry but loses cross-level coherence. Keeping the entire document and all
+levels in a single Sonnet context is why the levels read like nested tellings of the
+same story. Tradeoff: multi-minute runs, mitigated by live status and a validating
+retry loop instead of one-shot prayer.
+
+**Sonnet, not Opus, for rewrites.** The rewrite task is well-specified and
+validator-gated; Sonnet&#39;s speed/cost fits a per-upload loop. The prompt and validator
+carry the quality bar.
+
+**`span` ranges instead of child-ID lists.** Contiguity is the core invariant; a
+`[first, lastExclusive)` range can&#39;t even express a violation of it. Parents are derived
+at load time, never stored — one source of truth for alignment.
+
+**Deploys kill in-flight processing jobs.** Accepted for a prototype: on startup the
+backend marks orphaned jobs failed with an honest &#34;interrupted by a server restart&#34;
+message, and Dismiss deletes them server-side. A durable queue is phase-3 territory.
+
+**Double-click zooms instead of selecting words.** Google Maps semantics won over
+text-selection convention; a reading prototype favors navigation. Selection still works
+for drag-selection.
+
+**Assumes a single replica.** File-based stores and in-process background tasks are
+consistent only with one instance — fine at this scale, and the first thing to change
+if it ever isn&#39;t.
+
+---
+
+Design spec: `docs/superpowers/specs/2026-07-23-fastreader-design.md` ·
+Implementation plan: `docs/superpowers/plans/2026-07-23-fastreader-phase1.md`
+</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-07-23T22-49-21-169Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-07-23T22-49-21-169Z" class="timestamp-link"><time datetime="2026-07-23T22:49:21.169Z" data-timestamp="2026-07-23T22:49:21.169Z">2026-07-23T22:49:21.169Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /Users/honglei/code/fastreader/README.md has been updated successfully. (file state is current in your context — no need to Read it back)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-07-23T22-49-30-135Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-07-23T22-49-30-135Z" class="timestamp-link"><time datetime="2026-07-23T22:49:30.135Z" data-timestamp="2026-07-23T22:49:30.135Z">2026-07-23T22:49:30.135Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01K5xxbk5EUxPEcTXbEp4cv4">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Commit and push README</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">git pull --ff-only 2&gt;&amp;1 | tail -1 &amp;&amp; git add README.md &amp;&amp; git commit -q -m &#34;docs: full README — concept, usage, design decisions
+
+Co-Authored-By: Claude Fable 5 &lt;noreply@anthropic.com&gt;&#34; &amp;&amp; git push 2&gt;&amp;1 | tail -1</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-07-23T22-49-31-777Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-07-23T22-49-31-777Z" class="timestamp-link"><time datetime="2026-07-23T22:49:31.777Z" data-timestamp="2026-07-23T22:49:31.777Z">2026-07-23T22:49:31.777Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre> create mode 100644 frontend/src/lib/hint.ts
+   aa5f505..d3e754c  main -&gt; main</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-07-23T22-49-41-569Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-07-23T22-49-41-569Z" class="timestamp-link"><time datetime="2026-07-23T22:49:41.569Z" data-timestamp="2026-07-23T22:49:41.569Z">2026-07-23T22:49:41.569Z</time></a></div><div class="message-content">
+<div class="thinking"><div class="thinking-label">Thinking</div></div></div></div>
+<div class="message assistant" id="msg-2026-07-23T22-49-41-593Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-07-23T22-49-41-593Z" class="timestamp-link"><time datetime="2026-07-23T22:49:41.593Z" data-timestamp="2026-07-23T22:49:41.593Z">2026-07-23T22:49:41.593Z</time></a></div><div class="message-content">
+<div class="thinking"><div class="thinking-label">Thinking</div></div></div></div>
+<div class="message assistant" id="msg-2026-07-23T22-49-43-569Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-07-23T22-49-43-569Z" class="timestamp-link"><time datetime="2026-07-23T22:49:43.569Z" data-timestamp="2026-07-23T22:49:43.569Z">2026-07-23T22:49:43.569Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_015bJwWPaqaPV7P15crN6h1i">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Inspect user&#39;s UI changes, verify merged main builds</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">git log --oneline aa5f505 -3 2&gt;/dev/null | head -3; echo &#34;--- incoming changes:&#34;; git diff --stat 08e6dd7..aa5f505 2&gt;/dev/null | tail -5; cd frontend &amp;&amp; npx tsc --noEmit &amp;&amp; npm run build 2&gt;&amp;1 | tail -1 &amp;&amp; npm test 2&gt;&amp;1 | grep Tests</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-07-23T22-49-45-473Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-07-23T22-49-45-473Z" class="timestamp-link"><time datetime="2026-07-23T22:49:45.473Z" data-timestamp="2026-07-23T22:49:45.473Z">2026-07-23T22:49:45.473Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>aa5f505 Merge remote-tracking branch &#x27;origin/main&#x27; into ppuliu/zoom-ux-affordance
+08e6dd7 fix: Dismiss deletes failed jobs server-side; reap completed job files
+ed8ea26 feat: zoom discoverability — persistent dial with +/− buttons, selection dive popover, hover gutter icon, recurring hint
+--- incoming changes:
+ frontend/src/components/LevelView.tsx              | 16 +++-
+ frontend/src/components/Reader.tsx                 | 83 +++++++++++++++------
+ frontend/src/lib/hint.test.ts                      | 34 +++++++++
+ frontend/src/lib/hint.ts                           | 16 ++++
+ 6 files changed, 239 insertions(+), 37 deletions(-)
+✓ built in 78ms
+      Tests  8 passed (8)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-07-23T22-49-59-565Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-07-23T22-49-59-565Z" class="timestamp-link"><time datetime="2026-07-23T22:49:59.565Z" data-timestamp="2026-07-23T22:49:59.565Z">2026-07-23T22:49:59.565Z</time></a></div><div class="message-content">
+<div class="thinking"><div class="thinking-label">Thinking</div></div></div></div>
+<div class="message assistant" id="msg-2026-07-23T22-49-59-602Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-07-23T22-49-59-602Z" class="timestamp-link"><time datetime="2026-07-23T22:49:59.602Z" data-timestamp="2026-07-23T22:49:59.602Z">2026-07-23T22:49:59.602Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>README is live on <code>main</code>, and your zoom-discoverability work merged cleanly with it — the combined state type-checks, builds, and passes all 8 frontend tests (your <code>hint.test.ts</code> included), so the deploy that push triggered ships both the README and your new UI affordances (persistent dial with +/− buttons, selection dive popover, hover gutter icon, recurring hint).</p>
+<p>The README covers everything you asked for:</p>
+<ul>
+<li><strong>What is FastReader</strong> — the Maps metaphor, true rewrites, anchored zoom, link to the live site</li>
+<li><strong>How to use it</strong> — reading (full input table, proportional landing), adding documents (the agent flow, with the <em>Yellow Wallpaper</em> level names as the example), and local dev setup</li>
+<li><strong>What makes it interesting / non-obvious</strong> — rewrites-not-summaries, the alignment pyramid and its round-trip guarantee, the validator-gated agent loop, per-document level counts <em>and names</em>, instant client-side zoom, plain-scroll-is-sacred</li>
+<li><strong>Architecture</strong> — ASCII component diagram with a <code>&lt;!-- TODO: excalidraw diagram goes here --&gt;</code> marker where your drawing will slot in, plus the annotated document JSON format</li>
+<li><strong>Key design decisions and tradeoffs</strong> — nine of them, each with the reasoning and the accepted cost (whole-doc fetch, discrete zoom, files-not-DB, one-agent-run-per-pyramid, Sonnet choice, span ranges, deploy-kills-jobs, double-click semantics, single-replica assumption)</li>
+</ul>
+<p>When your excalidraw diagram is ready, drop it in the repo (e.g. <code>docs/architecture.excalidraw.png</code>) and I'll wire it into that TODO slot.</p></div></div></div>
+<div class="message user" id="msg-2026-07-23T23-47-05-186Z"><div class="message-header"><span class="role-label">User</span><a href="#msg-2026-07-23T23-47-05-186Z" class="timestamp-link"><time datetime="2026-07-23T23:47:05.186Z" data-timestamp="2026-07-23T23:47:05.186Z">2026-07-23T23:47:05.186Z</time></a></div><div class="message-content">
+<div class="user-content"><p>a few updates to the readme:
+1. the tagline should be: Read a book the way you browse a map — zoom out for the whole story, zoom in where it gets interesting.
+2. Running locally: can you use the docker version instead?
+3. What makes FastReader interesting: i perfer to use simpler language (this applies to the whole readme doc) and add / remove some items: this interaction model is only possible with the helpf of llm, as the model gets cheaper we can imagine a world of infinit levels of zooms, Levels are rewrites, not summaries - good, The alignment pyramid is what makes anchoring honest -&gt; something simpler to understand, we use an agent to do the rewriwte rather than simple llm so it can dynamically decide how to segement the document rather than static number of levels, Levels are per-document in count and in name -&gt; number of zoom levels is dynamic, remove Plain scroll is sacred
+4. the Key design decisions and tradeoffs shold focus more on product decisions and architecure design tradeoffs, you can check the commits to see how i iterated on the product. for example, i added select to dive behavior since otherwise it's not obvious to user on how to dive deeper
+5. add a section How i would extend this with more time</p>
+<p>a few things i would do: 
+1. build this as a chrome plugin, because it going to be very useful when peopel read long documents such as papers or blog posts online
+2. fine-tune the re-writing agent more to make sure it can produce more cohensive rewrites and each depth level
+3. improve the reading experience to support styling of texts and images of the books / papers
+4. [exploration] see if we use a super fast model such as haiku, whether we can do the rewriting in real time for zooming in and out, this will completely remove the pre-processing requirements and allow infinite number of zoom levels
+5. some functionality improvements: user management and auth, support upload pdf doc or fetching from a url, a chat interface for interactive q&amp;a of the book</p></div></div></div>
+<div class="message assistant" id="msg-2026-07-23T23-47-37-930Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-07-23T23-47-37-930Z" class="timestamp-link"><time datetime="2026-07-23T23:47:37.930Z" data-timestamp="2026-07-23T23:47:37.930Z">2026-07-23T23:47:37.930Z</time></a></div><div class="message-content">
+<div class="thinking"><div class="thinking-label">Thinking</div></div></div></div>
+<div class="message assistant" id="msg-2026-07-23T23-47-39-152Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-07-23T23-47-39-152Z" class="timestamp-link"><time datetime="2026-07-23T23:47:39.152Z" data-timestamp="2026-07-23T23:47:39.152Z">2026-07-23T23:47:39.152Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_017Yv7NZreRpiXBmDhdd4cyJ">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Pull latest and scan recent commits for product iterations</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">git pull --ff-only 2&gt;&amp;1 | tail -1; git log --oneline --all --since=&#34;3 hours ago&#34; | grep -v &#34;Co-Auth&#34; | head -15</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-07-23T23-47-39-692Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-07-23T23-47-39-692Z" class="timestamp-link"><time datetime="2026-07-23T23:47:39.692Z" data-timestamp="2026-07-23T23:47:39.692Z">2026-07-23T23:47:39.692Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre> create mode 100644 frontend/public/covers/the-yellow-wallpaper-f4a3c6.jpg
+4ad6ff6 docs: two-slide demo video opener with live-captured zoom GIFs
+490a46e fix: page get_source so large documents fit the MCP tool-output cap
+9a5c4d6 Merge remote-tracking branch &#x27;origin/main&#x27; into ppuliu/redesign-homepage-hero-visuals
+8af2f32 feat: cover for The Yellow Wallpaper (1899 first edition, public domain)
+a3ca69b Merge remote-tracking branch &#x27;origin/main&#x27; into ppuliu/redesign-homepage-hero-visuals
+d3e754c docs: full README — concept, usage, design decisions
+76c60db feat: real cover thumbnails on homepage cards and sharper map-zoom tagline
+aa5f505 Merge remote-tracking branch &#x27;origin/main&#x27; into ppuliu/zoom-ux-affordance
+08e6dd7 fix: Dismiss deletes failed jobs server-side; reap completed job files
+ed8ea26 feat: zoom discoverability — persistent dial with +/− buttons, selection dive popover, hover gutter icon, recurring hint
+ef477ca fix: fail orphaned processing jobs on startup (container restarts)
+6a956cc docs: zoom discoverability design spec
+fbd8166 feat: phase 2 container support — slim image, sandbox flag, clear pipeline errors
+2bf5bbe feat: upload UI — add-document modal and live job progress cards
+9ef9b2f feat: phase 2 backend — Agent SDK rewrite pipeline, upload API, job store</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-07-23T23-48-13-198Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-07-23T23-48-13-198Z" class="timestamp-link"><time datetime="2026-07-23T23:48:13.198Z" data-timestamp="2026-07-23T23:48:13.198Z">2026-07-23T23:48:13.198Z</time></a></div><div class="message-content">
+<div class="thinking"><div class="thinking-label">Thinking</div></div></div></div>
+<div class="message assistant" id="msg-2026-07-23T23-48-13-200Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-07-23T23-48-13-200Z" class="timestamp-link"><time datetime="2026-07-23T23:48:13.200Z" data-timestamp="2026-07-23T23:48:13.200Z">2026-07-23T23:48:13.200Z</time></a></div><div class="message-content">
+<div class="thinking"><div class="thinking-label">Thinking</div></div></div></div>
+<div class="message assistant" id="msg-2026-07-23T23-48-53-271Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-07-23T23-48-53-271Z" class="timestamp-link"><time datetime="2026-07-23T23:48:53.271Z" data-timestamp="2026-07-23T23:48:53.271Z">2026-07-23T23:48:53.271Z</time></a></div><div class="message-content"><div class="file-tool write-tool" data-tool-id="toolu_01AmEWsv8Z8fZBHD9JCWivfr">
+<div class="file-tool-header write-header"><span class="file-tool-icon">📝</span> Write <span class="file-tool-path">README.md</span></div>
+<div class="file-tool-fullpath">/Users/honglei/code/fastreader/README.md</div>
+<div class="truncatable"><div class="truncatable-content"><pre class="file-content"># FastReader
+
+**Read a book the way you browse a map — zoom out for the whole story, zoom in where it gets interesting.**
+
+Live at [fastreader.honglei.ai](https://fastreader.honglei.ai/)
+
+## What is FastReader
+
+Long documents give you a bad choice: read a summary and miss the depth, or read the
+whole thing and spend hours. FastReader removes the choice. Every document becomes a
+stack of zoom levels — the whole book in one paragraph at the top, the full text at the
+bottom, and a few honest depths in between. You zoom between them like a map, and the
+part you&#39;re reading stays put while everything around it changes resolution. You never
+lose your place.
+
+Read Alice in Wonderland in 25 seconds. Zoom in when the tea party gets interesting.
+Zoom back out when it doesn&#39;t.
+
+## How to use it
+
+### Reading
+
+Open a document. It starts at the top level — the whole thing in one paragraph. The
+dial on the right shows every level with its name and reading time.
+
+| Input | What it does |
+|---|---|
+| Scroll | Read within the current level |
+| Select any passage | A &#34;dive&#34; popover appears — click to expand that passage |
+| Pinch, or hold any modifier key and scroll | Zoom in and out at your pointer |
+| Double-click a paragraph | Dive into it (shift + double-click to go back up) |
+| The dial: click a stop, drag, or use + / − | Jump levels directly |
+
+Zooming in drops you exactly where you were reading: if you were 70% through a
+chapter&#39;s one-paragraph version, you land 70% through its expanded scenes. A brief
+gold flash marks where to keep reading.
+
+### Adding your own documents
+
+Click **Add a document**, paste text or load a `.txt`/`.md` file. A rewrite agent
+(Claude Sonnet via the [Claude Agent SDK](https://code.claude.com/docs/en/agent-sdk))
+reads it, decides how many levels it deserves, writes every level, and keeps fixing its
+work until it passes validation. A card shows live progress; longer documents take a
+few minutes. The agent also names the levels for each document — *The Yellow Wallpaper*
+came out as *In one breath → The nursery upstairs → Behind the pattern → Every word*.
+
+### Running locally
+
+```bash
+docker build -t fastreader .
+docker run -p 8000:8000 -v fastreader-data:/data \
+  -e ANTHROPIC_API_KEY=sk-ant-... \
+  fastreader
+# open http://localhost:8000
+```
+
+The API key is only needed for uploading new documents; the built-in library works
+without it. Tests: `backend/.venv/bin/pytest backend/tests` and `cd frontend &amp;&amp; npm test`.
+
+## What makes FastReader interesting
+
+**This only works because of LLMs.** Rewriting an entire book at four different depths
+used to mean hiring four editors. Now it&#39;s a few minutes and a few cents of model time.
+And as models get cheaper and faster, you can imagine where this goes: not four levels
+but any level — a smooth dial from one sentence to the full text.
+
+**Levels are rewrites, not summaries.** Each level reads like one continuous story at
+that depth, something you could hand a friend as &#34;the 3-minute version.&#34; It never reads
+like a pile of chapter summaries stapled together.
+
+**Zooming never loses your place.** Every paragraph knows exactly which paragraphs it
+expands into one level down, and a validator checks that this mapping covers the whole
+document with no gaps or overlaps. That&#39;s why zooming in and back out returns you to
+the exact same spot — it&#39;s checked math, not a guess.
+
+**An agent does the rewriting, not a single LLM call.** The agent reads the document,
+decides where the natural break points are, writes the levels, and submits its work to
+a validator. If validation fails, the errors go straight back to the agent and it tries
+again until the document is provably well-formed. Segmentation is a decision the agent
+makes per document — not a fixed template.
+
+**The number of zoom levels is dynamic.** A short story gets 4 levels, a novel gets 5
+or 6. The level names come from the rewrite itself, so the dial reads like it belongs
+to that document.
+
+## Architecture
+
+&lt;!-- TODO: excalidraw diagram goes here --&gt;
+
+```
+Browser SPA (Vite + React + TS + Tailwind)
+  Library · Reader = LevelView + AltitudeDial + ZoomController
+  — whole document fetched once; all zooming is client-side —
+        │  GET /api/documents · GET /api/documents/{id}
+        │  POST /api/upload · GET/DELETE /api/jobs/{id}
+        ▼
+FastAPI backend
+  ├── DocumentStore — merges data/builtin/ (shipped in the image)
+  │                   with $DATA_DIR/documents/ (Railway volume)
+  ├── JobStore — one JSON status file per processing job
+  └── background task → scripts/pipeline.py
+        └── Claude Agent SDK (Sonnet) with two in-process tools:
+            get_source (numbered paragraphs + level plan)
+            submit_rewrites (assemble + validate; errors retry the loop)
+```
+
+One self-contained JSON per document, no database:
+
+```jsonc
+{
+  &#34;id&#34;: &#34;the-yellow-wallpaper-f4a3c6&#34;,
+  &#34;title&#34;: &#34;The Yellow Wallpaper&#34;,
+  &#34;kind&#34;: &#34;book&#34;,                      // books render serif, papers sans
+  &#34;levels&#34;: [                          // 3 to 6 of these, decided per document
+    { &#34;name&#34;: &#34;In one breath&#34;, &#34;words&#34;: 106 },
+    { &#34;name&#34;: &#34;Behind the pattern&#34;, &#34;words&#34;: 2282 }
+    // ...
+  ],
+  &#34;segments&#34;: [                        // segments[level][i], reading order
+    [ { &#34;text&#34;: &#34;…&#34;, &#34;span&#34;: [0, 6] } ],   // span: which segments of the next
+    [ { &#34;text&#34;: &#34;…&#34;, &#34;span&#34;: [3, 6] } ],   // level down this one expands into
+    [ { &#34;text&#34;: &#34;…&#34; } ]                    // last level: the original text
+  ]
+}
+```
+
+`scripts/validate_data.py` checks the spans (in bounds, no gaps, no overlaps, full
+coverage). `scripts/assemble.py` builds this shape from the agent&#39;s rewrites and
+refuses anything invalid.
+
+## Key design decisions and tradeoffs
+
+**Discoverability was the hardest product problem.** The first version hid zoom behind
+pinch and modifier-scroll — magical once you knew, invisible if you didn&#39;t. The fix was
+several overlapping affordances: select any text and a &#34;dive&#34; popover appears, the dial
+got always-visible + / − buttons, paragraphs show a subtle dive icon on hover, and the
+hint reappears until you&#39;ve actually zoomed. Power users still get the fast paths; new
+users get an obvious one.
+
+**Preprocess once, read instantly.** Processing happens at upload time (minutes), so
+reading costs nothing: the whole level pyramid ships as one ~300KB fetch and every zoom
+is client-side. The product bet is that a document is uploaded once and read many
+times — so put all the waiting at upload, none in the reader.
+
+**Discrete levels with a 300ms crossfade, not continuous zoom.** True map-style
+continuous scaling would mean rendering two levels blended at intermediate sizes.
+The directional crossfade (the old level scales toward you when diving, away when
+rising) plus the landing flash buys most of the feel for a fraction of the work.
+
+**One agent run writes the whole pyramid.** The alternative — one API call per level —
+is cheaper to retry but each level stops knowing about the others. Keeping the whole
+document and all levels in one context is why they read like nested tellings of the
+same story. The costs: runs take minutes (mitigated by live status cards), and big
+documents needed the source tool to serve pages rather than one giant blob.
+
+**Files, not a database.** Built-in documents are JSON committed to the repo; uploads
+live on a persistent volume; job status is one small JSON file per job. A database
+earns its place when accounts or multiple servers arrive — the storage layer is a
+30-line class, so swapping it later is cheap.
+
+**Deploys kill in-flight processing jobs.** Accepted for now: on restart the backend
+marks orphaned jobs as failed with an honest &#34;interrupted by a server restart&#34; message,
+and dismissing a failed card deletes it for good. A durable job queue can come later.
+
+## How I would extend this with more time
+
+1. **Build it as a Chrome extension.** Most long-document reading happens in the
+   browser — papers, blog posts, documentation. Zooming any page in place, without
+   copy-pasting into an app, is where this gets genuinely useful.
+2. **Fine-tune the rewrite agent.** More work on making each level maximally cohesive
+   at its depth — the difference between a good rewrite and one that reads like the
+   author wrote that edition themselves.
+3. **Richer reading.** Keep the source&#39;s text styling, and carry images and figures
+   from books and papers through to every level.
+4. **[Exploration] Real-time rewriting with a very fast model.** If something like
+   Haiku can rewrite on the fly as you zoom, preprocessing disappears entirely — and
+   with it the fixed level count. Zoom becomes truly continuous: any passage, at any
+   depth, generated the moment you ask for it.
+5. **Product plumbing.** User accounts and auth, PDF upload and fetch-from-URL, and a
+   chat panel for asking questions about the book you&#39;re reading.
+
+---
+
+Design spec: `docs/superpowers/specs/2026-07-23-fastreader-design.md` ·
+Implementation plan: `docs/superpowers/plans/2026-07-23-fastreader-phase1.md`
+</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-07-23T23-48-53-354Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-07-23T23-48-53-354Z" class="timestamp-link"><time datetime="2026-07-23T23:48:53.354Z" data-timestamp="2026-07-23T23:48:53.354Z">2026-07-23T23:48:53.354Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /Users/honglei/code/fastreader/README.md has been updated successfully. (file state is current in your context — no need to Read it back)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-07-23T23-49-03-187Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-07-23T23-49-03-187Z" class="timestamp-link"><time datetime="2026-07-23T23:49:03.187Z" data-timestamp="2026-07-23T23:49:03.187Z">2026-07-23T23:49:03.187Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01VpdVV99ye8RzjcV5fc4yDk">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Commit and push revised README</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">git pull --ff-only 2&gt;&amp;1 | tail -1 &amp;&amp; git add README.md &amp;&amp; git commit -q -m &#34;docs: README rewrite — simpler language, docker quickstart, product-focused decisions, extensions section
+
+Co-Authored-By: Claude Fable 5 &lt;noreply@anthropic.com&gt;&#34; &amp;&amp; git push 2&gt;&amp;1 | tail -1</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-07-23T23-49-03-697Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-07-23T23-49-03-697Z" class="timestamp-link"><time datetime="2026-07-23T23:49:03.697Z" data-timestamp="2026-07-23T23:49:03.697Z">2026-07-23T23:49:03.697Z</time></a></div><div class="message-content"><div class="tool-result tool-error"><div class="truncatable"><div class="truncatable-content"><pre>Exit code 1
+Already up to date.
+On branch main
+Your branch is up to date with &#x27;origin/main&#x27;.
+
+Changes not staged for commit:
+  (use &quot;git add &lt;file&gt;...&quot; to update what will be committed)
+  (use &quot;git restore &lt;file&gt;...&quot; to discard changes in working directory)
+	modified:   ../README.md
+
+no changes added to commit (use &quot;git add&quot; and/or &quot;git commit -a&quot;)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-07-23T23-49-12-663Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-07-23T23-49-12-663Z" class="timestamp-link"><time datetime="2026-07-23T23:49:12.663Z" data-timestamp="2026-07-23T23:49:12.663Z">2026-07-23T23:49:12.663Z</time></a></div><div class="message-content">
+<div class="thinking"><div class="thinking-label">Thinking</div></div></div></div>
+<div class="message assistant" id="msg-2026-07-23T23-49-12-664Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-07-23T23-49-12-664Z" class="timestamp-link"><time datetime="2026-07-23T23:49:12.664Z" data-timestamp="2026-07-23T23:49:12.664Z">2026-07-23T23:49:12.664Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>cwd issue again — committing from the repo root:</p></div></div></div>
+<div class="message assistant" id="msg-2026-07-23T23-49-13-756Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-07-23T23-49-13-756Z" class="timestamp-link"><time datetime="2026-07-23T23:49:13.756Z" data-timestamp="2026-07-23T23:49:13.756Z">2026-07-23T23:49:13.756Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01NR7tytQ26LRVFPGcRrE21x">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Commit and push README from repo root</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">cd /Users/honglei/code/fastreader &amp;&amp; git add README.md &amp;&amp; git commit -q -m &#34;docs: README rewrite — simpler language, docker quickstart, product-focused decisions, extensions section
+
+Co-Authored-By: Claude Fable 5 &lt;noreply@anthropic.com&gt;&#34; &amp;&amp; git push 2&gt;&amp;1 | tail -1 &amp;&amp; git log --oneline -1</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-07-23T23-49-15-086Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-07-23T23-49-15-086Z" class="timestamp-link"><time datetime="2026-07-23T23:49:15.086Z" data-timestamp="2026-07-23T23:49:15.086Z">2026-07-23T23:49:15.086Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>   4ad6ff6..7cd9c12  main -&gt; main
+7cd9c12 docs: README rewrite — simpler language, docker quickstart, product-focused decisions, extensions section</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-07-23T23-49-31-602Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-07-23T23-49-31-602Z" class="timestamp-link"><time datetime="2026-07-23T23:49:31.602Z" data-timestamp="2026-07-23T23:49:31.602Z">2026-07-23T23:49:31.602Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>README rewritten and pushed (<code>7cd9c12</code>). All five updates in:</p>
+<ol>
+<li><strong>Tagline</strong> is now your map line, matching what's in the app.</li>
+<li><strong>Running locally</strong> is Docker-first: <code>docker build</code> + <code>docker run</code> with the volume and key, plus a note that the built-in library works without a key.</li>
+<li><strong>What makes FastReader interesting</strong> — rewritten in plainer language with your list: opens with <em>"This only works because of LLMs"</em> (including the cheaper-models → infinite-zoom-levels idea), keeps <em>rewrites-not-summaries</em>, replaces the alignment-pyramid jargon with <em>"Zooming never loses your place"</em> explained as checked math, adds <em>"An agent does the rewriting, not a single LLM call"</em> (dynamic segmentation as the reason), reframes the levels item as <em>"The number of zoom levels is dynamic"</em>, and drops the plain-scroll item.</li>
+<li><strong>Key design decisions</strong> now leads with product: <em>"Discoverability was the hardest product problem"</em> tells the story of your iteration (hidden pinch zoom → select-to-dive popover, dial +/− buttons, hover dive icon, recurring hint), then preprocess-once/read-instantly, discrete-vs-continuous zoom, one-agent-run coherence (including your <code>get_source</code> paging fix for big documents), files-not-DB, and the deploy-kills-jobs tradeoff.</li>
+<li><strong>"How I would extend this with more time"</strong> — your five items: Chrome extension, fine-tuning the rewrite agent, styled text + images, the Haiku real-time-rewriting exploration (no preprocessing, continuous zoom), and product plumbing (auth, PDF/URL ingestion, chat Q&amp;A).</li>
+</ol>
+<p>The excalidraw TODO marker is still in the Architecture section, ready for your diagram whenever it's done.</p></div></div></div>
+        
+
+<div class="pagination">
+<a href="index.html" class="index-link">Index</a>
+<a href="page-009.html">&larr; Prev</a>
+<a href="page-001.html">1</a>
+<a href="page-002.html">2</a>
+<a href="page-003.html">3</a>
+<a href="page-004.html">4</a>
+<a href="page-005.html">5</a>
+<a href="page-006.html">6</a>
+<a href="page-007.html">7</a>
+<a href="page-008.html">8</a>
+<a href="page-009.html">9</a>
+<span class="current">10</span>
+<a href="page-011.html">11</a>
+<a href="page-011.html">Next &rarr;</a>
+</div>
+
+    </div>
+    <script>
+document.querySelectorAll('time[data-timestamp]').forEach(function(el) {
+    const timestamp = el.getAttribute('data-timestamp');
+    const date = new Date(timestamp);
+    const now = new Date();
+    const isToday = date.toDateString() === now.toDateString();
+    const timeStr = date.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+    if (isToday) { el.textContent = timeStr; }
+    else { el.textContent = date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) + ' ' + timeStr; }
+});
+document.querySelectorAll('pre.json').forEach(function(el) {
+    let text = el.textContent;
+    text = text.replace(/"([^"]+)":/g, '<span style="color: #ce93d8">"$1"</span>:');
+    text = text.replace(/: "([^"]*)"/g, ': <span style="color: #81d4fa">"$1"</span>');
+    text = text.replace(/: (\d+)/g, ': <span style="color: #ffcc80">$1</span>');
+    text = text.replace(/: (true|false|null)/g, ': <span style="color: #f48fb1">$1</span>');
+    el.innerHTML = text;
+});
+document.querySelectorAll('.truncatable').forEach(function(wrapper) {
+    const content = wrapper.querySelector('.truncatable-content');
+    const btn = wrapper.querySelector('.expand-btn');
+    if (content.scrollHeight > 250) {
+        wrapper.classList.add('truncated');
+        btn.addEventListener('click', function() {
+            if (wrapper.classList.contains('truncated')) { wrapper.classList.remove('truncated'); wrapper.classList.add('expanded'); btn.textContent = 'Show less'; }
+            else { wrapper.classList.remove('expanded'); wrapper.classList.add('truncated'); btn.textContent = 'Show more'; }
+        });
+    }
+});
+</script>
+</body>
+</html>
